@@ -104,7 +104,6 @@ GET /counter/reset                          => { counter: 0 }
 GET /counter/increment                      => { counter: 1 }
 GET /counter/increment                      => { counter: 2 }
 GET /counter/add/20/3                       => 23
-
 ```
 (more examples to come shortly, hang tight!)
 
