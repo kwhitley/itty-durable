@@ -1,14 +1,8 @@
 {
   "name": "itty-durable",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Cloudflare Durable Objects + Itty Router = Shorter Code",
-  "main": "./dist/itty-durable.min.js",
-  "types": "./dist/itty-durable.d.ts",
-  "files": [
-    "dist/itty-durable.js",
-    "dist/itty-durable.min.js",
-    "dist/itty-durable.d.ts"
-  ],
+  "main": "./index.js",
   "keywords": [
     "router",
     "cloudflare",
@@ -33,7 +27,7 @@
     "prerelease": "yarn verify",
     "prebuild": "rimraf dist",
     "build": "terser-folder src -eo dist --pattern '**/*.js,!**/*spec.js' -x .js",
-    "release": "release --tag --push"
+    "release": "release --tag --push --src=dist"
   },
   "repository": {
     "type": "git",
