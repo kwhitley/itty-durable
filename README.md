@@ -1,13 +1,8 @@
 # ![Itty Durable][logo-image]
 
 [![npm package][npm-image]][npm-url]
-[![minified + gzipped size][gzip-image]][gzip-url]
 [![Build Status][travis-image]][travis-url]
-[![Coverage Status][coveralls-image]][coveralls-url]
 [![Open Issues][issues-image]][issues-url]
-<a href="https://npmjs.com/package/itty-durable" target="\_parent">
-  <img alt="" src="https://img.shields.io/npm/dm/itty-durable.svg" />
-</a>
 <a href="https://github.com/kwhitley/itty-durable" target="\_parent">
   <img alt="" src="https://img.shields.io/github/stars/kwhitley/itty-durable.svg?style=social&label=Star" />
 </a>
