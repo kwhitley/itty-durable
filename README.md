@@ -1,52 +1,84 @@
-# ![Itty Router][logo-image]
+# ![Itty Durable][logo-image]
 
 [![npm package][npm-image]][npm-url]
 [![minified + gzipped size][gzip-image]][gzip-url]
 [![Build Status][travis-image]][travis-url]
 [![Coverage Status][coveralls-image]][coveralls-url]
 [![Open Issues][issues-image]][issues-url]
-<a href="https://npmjs.com/package/itty-router" target="\_parent">
-  <img alt="" src="https://img.shields.io/npm/dm/itty-router.svg" />
+<a href="https://npmjs.com/package/itty-durable" target="\_parent">
+  <img alt="" src="https://img.shields.io/npm/dm/itty-durable.svg" />
 </a>
-<a href="https://github.com/kwhitley/itty-router" target="\_parent">
-  <img alt="" src="https://img.shields.io/github/stars/kwhitley/itty-router.svg?style=social&label=Star" />
+<a href="https://github.com/kwhitley/itty-durable" target="\_parent">
+  <img alt="" src="https://img.shields.io/github/stars/kwhitley/itty-durable.svg?style=social&label=Star" />
 </a>
 <a href="https://twitter.com/kevinrwhitley" target="\_parent">
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
-<!--<a href="https://github.com/kwhitley/itty-router/discussions">
-  <img alt="Join the discussion on Github" src="https://img.shields.io/badge/Github%20Discussions%20%26%20Support-Chat%20now!-blue" />
-</a>-->
 
-It's an itty bitty router, designed for Express.js-like routing within [Cloudflare Workers](https://developers.cloudflare.com/workers/) (or anywhere else). Like... it's super tiny (~460 bytes), with zero dependencies. For reals.
 
-For quality-of-life improvements (e.g. middleware, cookies, body parsing, json handling, errors, and an itty version with automatic exception handling), to further shorten your routing code, be sure to check out [itty-router-extras](https://www.npmjs.com/package/itty-router-extras) - also specifically written for API development on [Cloudflare Workers](https://developers.cloudflare.com/workers/)!
 
 ## Installation
 
 ```
-npm install itty-router
+npm install itty-router itty-router-extras itty-durable
 ```
 
 ## Example
+##### Counter.js
 ```js
-import { Router } from 'itty-router'
+import { IttyDurable } from 'itty-durable'
 
-// now let's create a router (note the lack of "new")
-const router = Router()
+export class Counter extends IttyDurable {
+  constructor(state, env) {
+    super(state, env)
+    this.counter = 0
+  }
 
-// GET collection index
-router.get('/todos', () => new Response('Todos Index!'))
+  increment() {
+    this.counter++
+  }
 
-// GET item
-router.get('/todos/:id', ({ params }) => new Response(`Todo #${params.id}`))
+  add(a, b) {
+    return a + b
+  }
+}
+```
 
-// POST to the collection (we'll use async here)
-router.post('/todos', async request => {
-  const content = await request.json()
+##### Worker.js
+```js
+import { ThrowableRouter, withParams } from 'itty-router-extras'
 
-  return new Response('Creating Todo: ' + JSON.stringify(content))
-})
+router
+  // add upstream middleware, allowing Durable access
+  .all('*', withDurables())
+
+  // example route with multiple calls to DO
+  .get('/increment-a-few-times',
+    async ({ Counter }) => {
+      const counter = Counter.get('test') // gets DO with id/namespace = 'test'
+
+      // then we fire some methods on the durable... these could all be done separately.
+      await Promise.all([
+        counter.increment(),
+        counter.increment(),
+        counter.increment(),
+      ])
+
+      // and return the contents (it'll be a json response)
+      return counter.toJSON()
+    }
+  )
+
+  // get get the durable itself... returns json response, so no need to wrap
+  .get('/counter', ({ Counter }) => Counter.get('test').toJSON())
+
+  // reset the durable)
+  .get('/counter/reset', ({ Counter }) => Counter.get('test').clear())
+
+  // will pass on requests to the durable... (e.g. /counter/add/3/4 => 7)
+  .get('/counter/:action/:a?/:b?', withParams,
+    ({ Counter, action, a, b }) => Counter.get('test')[action](Number(a), Number(b))
+  )
 
 // 404 for everything else
 router.all('*', () => new Response('Not Found.', { status: 404 }))
@@ -58,326 +90,36 @@ addEventListener('fetch', event =>
 ```
 
 ## Features
-- [x] Tiny (~460 bytes) with zero dependencies.
-- [x] Full sync/async support.  Use it when you need it!
-- [x] Route params, with wildcards and optionals (e.g. `/api/:collection/:id?`)
-- [x] Query parsing (e.g. `?page=3&foo=bar`)
-- [x] [Middleware support](#middleware). Any number of sync/async handlers may be passed to a route.
-- [x] [Nestable](#nested-routers-with-404-handling). Supports nesting routers for API branching.
-- [x] [Base path](#nested-routers-with-404-handling) for prefixing all routes.
-- [x] [Multi-method support](#nested-routers-with-404-handling) using the `.all()` channel.
-- [x] Supports **any** method type (e.g. `.get() --> 'GET'` or `.puppy() --> 'PUPPY'`).
-- [x] [Extendable](#extending-itty-router). Use itty as the internal base for more feature-rich/elaborate routers.
-- [x] Chainable route declarations (why not?)
-- [ ] Readable internal code (yeah right...)
+- Removes nearly all boilerplate from Durable Objects
+- Allows you to fire instance methods directly on stub (will asynchronously call the same on Durable Object)
+- Optional persistance (on change)
+- Optional created/modified timestamps
 
-## Options API
-#### `Router(options = {})`
+## Exports
 
-| Name | Type(s) | Description | Examples |
-| --- | --- | --- | --- |
-| `base` | `string` | prefixes all routes with this string | `Router({ base: '/api' })`
+### `IttyDurable: class`
+Base class to extend, with persistOnChange, but no timestamps.
 
-## Usage
-### 1. Create a Router
-```js
-import { Router } from 'itty-router'
+### `createIttyDurable(options = {}): class`
+Factory function for defining another IttyDurable class (different base options).
 
-const router = Router() // no "new", as this is not a real class
-```
+### `withDurables(options = {})`
+This is the Worker middleware to put either on routes individually, up globally as an upstream route.  This allows requests for the DO binding directly off the request, and simplifies even the id translation.  Any durable stubs retrieved this way automatically talk to the router within IttyDurable (base class) when accessing instance methods on the stub, allowing all `fetch` boilerplate to be abstracted away.
 
-### 2. Register Route(s)
-##### `router.{method}(route: string, handler1: function, handler2: function, ...)`
-```js
-// register a route on the "GET" method
-router.get('/todos/:user/:item?', (req) => {
-  const { params, query } = req
-
-  console.log({ params, query })
-})
-```
-
-### 3. Handle Incoming Request(s)
-##### `async router.handle(request.proxy: Proxy || request: Request, ...anything else)`
-Requests (doesn't have to be a real Request class) should have both a **method** and full **url**.
-The `handle` method will then return the first matching route handler that returns something (or nothing at all if no match).
-
-```js
-router.handle({
-  method: 'GET',                              // required
-  url: 'https://example.com/todos/jane/13',   // required
-})
-
-/*
-Example outputs (using route handler from step #2 above):
-
-GET /todos/jane/13
-{
-  params: {
-    user: 'jane',
-    item: '13'
-  },
-  query: {}
-}
-
-GET /todos/jane
-{
-  params: {
-    user: 'jane'
-  },
-  query: {}
-}
-
-GET /todos/jane?limit=2&page=1
-{
-  params: {
-    user: 'jane'
-  },
-  query: {
-    limit: '2',
-    page: '2'
-  }
-}
-*/
-```
-
-#### A few notes about this:
-- **Error Handling:** By default, there is no error handling built in to itty.  However, the handle function is async, allowing you to add a `.catch(error)` like this:
-
-  ```js
-  import { Router } from 'itty-router'
-
-  // a generic error handler
-  const errorHandler = error =>
-    new Response(error.message || 'Server Error', { status: error.status || 500 })
-
-  // add some routes (will both safely trigger errorHandler)
-  router
-    .get('/accidental', request => request.that.will.throw)
-    .get('/intentional', () => {
-      throw new Error('Bad Request')
-    })
-
-  // attach the router "handle" to the event handler
-  addEventListener('fetch', event =>
-    event.respondWith(
-      router.handle(event.request).catch(errorHandler)
-    )
-  )
-  ```
-- **Extra Variables:** The router handle expects only the request itself, but passes along any additional params to the handlers/middleware.  For example, to access the `event` itself within a handler (e.g. for `event.waitUntil()`), you could simply do this:
-
-  ```js
-  const router = Router()
-
-  router.add('/long-task', (request, event) => {
-    event.waitUntil(longAsyncTaskPromise)
-
-    return new Response('Task is still running in the background!')
-  })
-
-  addEventListener('fetch', event =>
-    event.respondWith(router.handle(event.request, event))
-  )
-  ```
-- **Proxies:** To allow for some pretty incredible middleware hijacks, we pass `request.proxy` (if it exists) or `request` (if not) to the handler.  This allows middleware to set `request.proxy = new Proxy(request.proxy || request, {})` and effectively take control of reads/writes to the request object itself.  As an example, the `withParams` middleware in `itty-router-extras` uses this to control future reads from the request.  It intercepts "get" on the Proxy, first checking the requested attribute within the `request.params` then falling back to the `request` itself.
-
-## Examples
-
-### Nested Routers with 404 handling
-```js
-// lets save a missing handler
-const missingHandler = new Response('Not found.', { status: 404 })
-
-// create a parent router
-const parentRouter = Router({ base: '/api' )
-
-// and a child router (with FULL base path defined, from root)
-const todosRouter = Router({ base: '/api/todos' })
-
-// with some routes on it (these will be relative to the base)...
-todosRouter
-  .get('/', () => new Response('Todos Index'))
-  .get('/:id', ({ params }) => new Response(`Todo #${params.id}`))
-
-// then divert ALL requests to /todos/* into the child router
-parentRouter
-  .all('/todos/*', todosRouter.handle) // attach child router
-  .all('*', missingHandler) // catch any missed routes
-
-// GET /todos --> Todos Index
-// GET /todos/13 --> Todo #13
-// POST /todos --> missingHandler (caught eventually by parentRouter)
-// GET /foo --> missingHandler
-```
-
-A few quick caveats about nesting... each handler/router is fired in complete isolation, unaware of upstream routers.  Because of this, base paths do **not** chain from parent routers - meaning each child branch/router will need to define its **full** path.
-
-However, as a bonus (from v2.2+), route params will use the base path as well (e.g. `Router({ path: '/api/:collection' })`).
-
-### Middleware
-Any handler that does not **return** will effectively be considered "middleware", continuing to execute future functions/routes until one returns, closing the response.
-
-```js
-// withUser modifies original request, but returns nothing
-const withUser = request => {
-  request.user = { name: 'Mittens', age: 3 }
-}
-
-// requireUser optionally returns (early) if user not found on request
-const requireUser = request => {
-  if (!request.user) {
-    return new Response('Not Authenticated', { status: 401 })
-  }
-}
-
-// showUser returns a response with the user (assumed to exist)
-const showUser = request => new Response(JSON.stringify(request.user))
-
-// now let's add some routes
-router
-  .get('/pass/user', withUser, requireUser, showUser)
-  .get('/fail/user', requireUser, showUser)
-
-router.handle({ method: 'GET', url: 'https://example.com/pass/user' })
-// withUser injects user, allowing requireUser to not return/continue
-// STATUS 200: { name: 'Mittens', age: 3 }
-
-router.handle({ method: 'GET', url: 'https://example.com/fail/user' })
-// requireUser returns early because req.user doesn't exist
-// STATUS 401: Not Authenticated
-```
-
-### Multi-route (Upstream) Middleware
-```js
-// middleware that injects a user, but doesn't return
-const withUser = request => {
-  request.user = { name: 'Mittens', age: 3 }
-}
-
-router
-  .get('*', withUser) // embeds user before all other matching routes
-  .get('/user', request => new Response(`Hello, ${user.name}!`))
-
-router.handle({ method: 'GET', url: 'https://example.com/user' })
-// STATUS 200: Hello, Mittens!
-```
-
-### File format support
-```js
-// GET item with optional format/extension
-router.get('/todos/:id.:format?', request => {
-  const { id, format = 'csv' } = request.params
-
-  return new Response(`Getting todo #${id} in ${format} format.`)
-})
-```
-
-### Cloudflare ES6 Module Syntax (required for Durable Objects) <a id="cf-es6-module-syntax"></a>
-```js
-const router = Router()
-
-router.get('/', (request, env) => {
-  // now have access to the env (where CF bindings like durables, KV, etc now are)
-})
-
-export default {
-  fetch: router.handle // yep, it's this easy.
-}
-```
-
-### Extending itty router
-Extending itty is as easy as wrapping Router in another Proxy layer to control the handle (or the route registering).  For example, here's the code to
-ThrowableRouter in itty-router-extras... a version of itty with built-in error-catching for convenience.
-```js
-import { Router } from 'itty-router'
-
-// a generic error handler
-const errorHandler = error =>
-  new Response(error.message || 'Server Error', { status: error.status || 500 })
-
-// and the new-and-improved itty
-const ThrowableRouter = (options = {}) =>
-  new Proxy(Router(options), {
-    get: (obj, prop) => (...args) =>
-        prop === 'handle'
-        ? obj[prop](...args).catch(errorHandler)
-        : obj[prop](...args)
-  })
-
-// 100% drop-in replacement for Router
-const router = ThrowableRouter()
-
-// add some routes
-router
-  .get('/accidental', request => request.that.will.throw) // will safely trigger error (above)
-  .get('/intentional', () => {
-    throw new Error('Bad Request') // will also trigger error handler
-  })
-```
-
-## Testing and Contributing
-1. Fork repo
-1. Install dev dependencies via `yarn`
-1. Start test runner/dev mode `yarn dev`
-1. Add your code and tests if needed - do NOT remove/alter existing tests
-1. Verify that tests pass once minified `yarn verify`
-1. Commit files
-1. Submit PR with a detailed description of what you're doing
-1. I'll add you to the credits! :)
-
-### The Entire Code (for more legibility, [see src on GitHub](https://github.com/kwhitley/itty-router/blob/v1.x/src/itty-router.js))
-```js
-const Router = (o = {}) =>
-  new Proxy(o, {
-    get: (t, k, c) => k === 'handle'
-      ? async (r, ...a) => {
-          for (let [p, hs] of t.r.filter(i => i[2] === r.method || i[2] === 'ALL')) {
-            let m, s, u
-            if (m = (u = new URL(r.url)).pathname.match(p)) {
-              r.params = m.groups
-              r.query = Object.fromEntries(u.searchParams.entries())
-
-              for (let h of hs) {
-                if ((s = await h(r.proxy || r, ...a)) !== undefined) return s
-              }
-            }
-          }
-        }
-      : (p, ...hs) =>
-          (t.r = t.r || []).push([
-            `^${((t.base || '') + p)
-              .replace(/(\/?)\*/g, '($1.*)?')
-              .replace(/\/$/, '')
-              .replace(/:(\w+)(\?)?(\.)?/g, '$2(?<$1>[^/$3]+)$2$3')
-            }\/*$`,
-            hs,
-            k.toUpperCase(),
-          ]) && c
-  })
-```
-
-## Special Thanks
-This repo goes out to my past and present colleagues at Arundo - who have brought me such inspiration, fun,
-and drive over the last couple years.  In particular, the absurd brevity of this code is thanks to a
-clever [abuse] of `Proxy`, courtesy of the brilliant [@mvasigh](https://github.com/mvasigh).
-This trick allows methods (e.g. "get", "post") to by defined dynamically by the router as they are requested,
-**drastically** reducing boilerplate.
-
-[twitter-image]:https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fitty-router
-[logo-image]:https://user-images.githubusercontent.com/865416/79531114-fa0d8200-8036-11ea-824d-70d84164b00a.png
-[gzip-image]:https://img.shields.io/bundlephobia/minzip/itty-router
-[gzip-url]:https://bundlephobia.com/result?p=itty-router
-[issues-image]:https://img.shields.io/github/issues/kwhitley/itty-router
-[issues-url]:https://github.com/kwhitley/itty-router/issues
-[npm-image]:https://img.shields.io/npm/v/itty-router.svg
-[npm-url]:http://npmjs.org/package/itty-router
-[travis-image]:https://travis-ci.org/kwhitley/itty-router.svg?branch=v1.x
-[travis-url]:https://travis-ci.org/kwhitley/itty-router
-[david-image]:https://david-dm.org/kwhitley/itty-router/status.svg
-[david-url]:https://david-dm.org/kwhitley/itty-router
-[coveralls-image]:https://coveralls.io/repos/github/kwhitley/itty-router/badge.svg?branch=v1.x
-[coveralls-url]:https://coveralls.io/github/kwhitley/itty-router?branch=v1.x
+[twitter-image]:https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fitty-durable
+[logo-image]:https://user-images.githubusercontent.com/865416/114285361-2bd3e180-9a1c-11eb-8386-a2e9f4383d43.png
+[gzip-image]:https://img.shields.io/bundlephobia/minzip/itty-durable
+[gzip-url]:https://bundlephobia.com/result?p=itty-durable
+[issues-image]:https://img.shields.io/github/issues/kwhitley/itty-durable
+[issues-url]:https://github.com/kwhitley/itty-durable/issues
+[npm-image]:https://img.shields.io/npm/v/itty-durable.svg
+[npm-url]:http://npmjs.org/package/itty-durable
+[travis-image]:https://travis-ci.org/kwhitley/itty-durable.svg?branch=v0.x
+[travis-url]:https://travis-ci.org/kwhitley/itty-durable
+[david-image]:https://david-dm.org/kwhitley/itty-durable/status.svg
+[david-url]:https://david-dm.org/kwhitley/itty-durable
+[coveralls-image]:https://coveralls.io/repos/github/kwhitley/itty-durable/badge.svg?branch=v0.x
+[coveralls-url]:https://coveralls.io/github/kwhitley/itty-durable?branch=v0.x
 
 ## Contributors
 These folks are the real heroes, making open source the powerhouse that it is!  Help out and get your name added to this list! <3

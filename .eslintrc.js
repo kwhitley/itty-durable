@@ -39,10 +39,7 @@ module.exports = {
                 'before': false
             }
         ],
-        'comma-style': [
-            'error',
-            'last'
-        ],
+        'comma-style': 'off',
         'complexity': 'error',
         'computed-property-spacing': [
             'error',
@@ -117,7 +114,7 @@ module.exports = {
         'no-catch-shadow': 'error',
         'no-confusing-arrow': 'off',
         'no-console': 'off',
-        'no-constructor-return': 'error',
+        'no-constructor-return': 'off',
         'no-continue': 'error',
         'no-div-regex': 'error',
         'no-duplicate-imports': 'error',
@@ -244,7 +241,7 @@ module.exports = {
         'sort-imports': 'error',
         'sort-vars': 'off',
         'space-before-blocks': 'error',
-        'space-before-function-paren': 'error',
+        'space-before-function-paren': 'off',
         'space-in-parens': [
             'error',
             'never'
