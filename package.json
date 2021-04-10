@@ -1,6 +1,6 @@
 {
   "name": "itty-durable",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Cloudflare Durable Objects + Itty Router = Shorter Code",
   "main": "./dist/itty-durable.min.js",
   "types": "./dist/itty-durable.d.ts",
@@ -27,13 +27,12 @@
     "lint": "npx eslint src",
     "test:dist": "jest --verbose --coverage dist",
     "test": "yarn lint && jest --verbose --coverage src",
-    "verify": "echo 'verifying module...' && yarn build && yarn test && yarn test:dist",
+    "verify": "echo 'verifying module...' && yarn build && yarn test",
     "dev": "yarn lint && jest --verbose --watch src",
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
     "prerelease": "yarn verify",
-    "prebuild": "rimraf dist && mkdir dist && node prebuild.js && cp src/itty-durable.d.ts dist",
-    "build": "terser -c -m toplevel -- dist/itty-durable.js  > dist/itty-durable.min.js",
-    "postbuild": "node check-size.js",
+    "prebuild": "rimraf dist",
+    "build": "terser-folder src -eo dist --pattern '**/*.js,!**/*spec.js' -x .js",
     "release": "release --tag --push"
   },
   "repository": {
