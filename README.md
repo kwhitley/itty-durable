@@ -10,11 +10,13 @@
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
 
-This takes the extreme stateful power of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) (now in open beta), but drastically cuts down on the boilerplate to use them.  Currently, the only way to communicate to durable objects (DO) is via fetch, requiring internal routing/handling of requests inside the DO, as well as building/passing the request in from a Worker or other DO in the first place.  On top of that, there are a couple steps to even get the instance "stub" to work with in the first place, before you can call `fetch` on it.
+## TLDR; [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) + [Itty Router](https://www.npmjs.com/package/itty-router) = [much shorter code](#example)
+
+This takes the extreme stateful power of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) (now in open beta), but drastically cuts down on the boilerplate to use them by pairing it with the flexibility of [Itty Router](https://www.npmjs.com/package/itty-router).  Currently, the only way to communicate to durable objects (DO) is via fetch, requiring internal routing/handling of requests inside the DO, as well as building/passing the request in from a Worker or other DO in the first place.  On top of that, there are a couple steps to even get the instance "stub" to work with in the first place, before you can call `fetch` on it.
 
 IttyDurable offers a shortcut.
 
-By having your durable objects extend the `IttyDurable` base class, it creates automatic internal routing/fetch handling.  This allows you to ignore the initialization (from storage) step, as well as the `fetch` call itself from inside the DO, instead using the internal router for access/flow.
+By having your durable objects extend the `IttyDurable` base class, it creates automatic internal routing/fetch handling via a tiny, embedded [Itty Router](https://www.npmjs.com/package/itty-router).  This allows you to ignore the initialization (from storage) step, as well as the `fetch` call itself from inside the DO, instead using the internal router for access/flow.
 
 By adding in the next piece, the `withDurables()` middleware to the calling router (the outside Worker usually), we make this even more elegant.  Now, you can typically ignore the durable object router entirely, and instead call methods (or await properties) directly on the stub itself.  Under the hood, this fires a fetch that the built-in router will handle, firing the appropriate method, and passing (json-parsable) arguments in from the request.
 
@@ -23,7 +25,7 @@ By adding in the next piece, the `withDurables()` middleware to the calling rout
 ## Installation
 
 ```
-npm install itty-router itty-router-extras itty-durable
+npm install itty-durable itty-router itty-router-extras
 ```
 
 ## Example
@@ -51,9 +53,14 @@ export class Counter extends IttyDurable {
 ```js
 import { ThrowableRouter, missing, withParams } from 'itty-router-extras'
 
+const router = ThrowableRouter({ base: '/counter' })
+
 router
   // add upstream middleware, allowing Durable access
   .all('*', withDurables())
+  
+  // get get the durable itself... returns json response, so no need to wrap
+  .get('/', ({ Counter }) => Counter.get('test').toJSON())
 
   // example route with multiple calls to DO
   .get('/increment-a-few-times',
@@ -72,14 +79,11 @@ router
     }
   )
 
-  // get get the durable itself... returns json response, so no need to wrap
-  .get('/counter', ({ Counter }) => Counter.get('test').toJSON())
-
   // reset the durable)
-  .get('/counter/reset', ({ Counter }) => Counter.get('test').clear())
+  .get('/reset', ({ Counter }) => Counter.get('test').clear())
 
-  // will pass on requests to the durable... (e.g. /counter/add/3/4 => 7)
-  .get('/counter/:action/:a?/:b?', withParams,
+  // will pass on unknown requests to the durable... (e.g. /counter/add/3/4 => 7)
+  .get('/:action/:a?/:b?', withParams,
     ({ Counter, action, a, b }) => Counter.get('test')[action](Number(a), Number(b))
   )
 
@@ -90,6 +94,17 @@ router
 export default {
   fetch: router.handle
 }
+```
+
+### Interacting with it!
+```
+GET /counter/increment-a-few-times          => { counter: 3 }
+GET /counter/increment-a-few-times          => { counter: 6 }
+GET /counter/reset                          => { counter: 0 }
+GET /counter/increment                      => { counter: 1 }
+GET /counter/increment                      => { counter: 2 }
+GET /counter/add/20/3                       => 23
+
 ```
 (more examples to come shortly, hang tight!)
 
