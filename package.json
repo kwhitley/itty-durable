@@ -1,0 +1,74 @@
+{
+  "name": "itty-router",
+  "version": "2.3.6",
+  "description": "Tiny, zero-dependency router with route param and query parsing - build for Cloudflare Workers, but works everywhere!",
+  "main": "./dist/itty-router.min.js",
+  "types": "./dist/itty-router.d.ts",
+  "files": [
+    "dist/itty-router.js",
+    "dist/itty-router.min.js",
+    "dist/itty-router.d.ts"
+  ],
+  "keywords": [
+    "router",
+    "cloudflare",
+    "workers",
+    "serverless",
+    "express",
+    "regex",
+    "routing",
+    "api",
+    "handler",
+    "params",
+    "middleware",
+    "nested",
+    "rest",
+    "crud",
+    "query",
+    "parameters",
+    "durable",
+    "objects"
+  ],
+  "scripts": {
+    "docs:dev": "cp README.md ./docs/pages/README.md && vite",
+    "docs:build": "cp README.md ./docs/pages/README.md && vite build",
+    "docs:serve": "vite preview",
+    "lint": "npx eslint src",
+    "test:dist": "jest --verbose --coverage dist",
+    "test": "yarn lint && jest --verbose --coverage src",
+    "verify": "echo 'verifying module...' && yarn build && yarn test && yarn test:dist",
+    "dev": "yarn lint && jest --verbose --watch src",
+    "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
+    "prerelease": "yarn verify",
+    "prebuild": "rimraf dist && mkdir dist && node prebuild.js && cp src/itty-router.d.ts dist",
+    "build": "terser -c -m toplevel -- dist/itty-router.js  > dist/itty-router.min.js",
+    "postbuild": "node check-size.js",
+    "release": "release --tag --push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kwhitley/itty-router.git"
+  },
+  "author": "Kevin R. Whitley <krwhitley@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kwhitley/itty-router/issues"
+  },
+  "homepage": "https://itty-router.dev",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.1.5",
+    "@vue/compiler-sfc": "^3.0.7",
+    "chalk": "^4.1.0",
+    "coveralls": "^3.1.0",
+    "eslint": "^7.20.0",
+    "eslint-plugin-jest": "^24.1.5",
+    "fs-extra": "^9.1.0",
+    "gzip-size": "^6.0.0",
+    "isomorphic-fetch": "^3.0.0",
+    "jest": "^26.6.3",
+    "rimraf": "^3.0.2",
+    "terser": "^5.6.0",
+    "vite": "^2.0.5",
+    "yarn-release": "^1.10.3"
+  }
+}
