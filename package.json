@@ -44,7 +44,6 @@
   "bugs": {
     "url": "https://github.com/kwhitley/itty-durable/issues"
   },
-  "homepage": "https://itty-durable.dev",
   "devDependencies": {
     "chalk": "^4.1.0",
     "coveralls": "^3.1.0",

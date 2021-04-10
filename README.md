@@ -10,7 +10,15 @@
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
 
+This takes the extreme stateful power of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) (now in open beta), but drastically cuts down on the boilerplate to use them.  Currently, the only way to communicate to durable objects (DO) is via fetch, requiring internal routing/handling of requests inside the DO, as well as building/passing the request in from a Worker or other DO in the first place.  On top of that, there are a couple steps to even get the instance "stub" to work with in the first place, before you can call `fetch` on it.
 
+IttyDurable offers a shortcut.
+
+By having your durable objects extend the `IttyDurable` base class, it creates automatic internal routing/fetch handling.  This allows you to ignore the initialization (from storage) step, as well as the `fetch` call itself from inside the DO, instead using the internal router for access/flow.
+
+By adding in the next piece, the `withDurables()` middleware to the calling router (the outside Worker usually), we make this even more elegant.  Now, you can typically ignore the durable object router entirely, and instead call methods (or await properties) directly on the stub itself.  Under the hood, this fires a fetch that the built-in router will handle, firing the appropriate method, and passing (json-parsable) arguments in from the request.
+
+**DISCLAIMER: This is very much a "working prototype" and will be hardened over the coming weeks with the help of folks on the CF Discord group, and your feedback (in issues).  API changes, polls, etc will be broadcast on the #durable-objects channel of that server, as well as on [Twitter](https://twitter.com/kevinrwhitley).  Please follow along there (or follow me) for updates and to communicate feedback!  Additionally, I'll be putting together a screencast/explanation on YouTube to show how it works - hopefully that can inspire someone else to come along and make it even better!**
 
 ## Installation
 
@@ -19,7 +27,7 @@ npm install itty-router itty-router-extras itty-durable
 ```
 
 ## Example
-##### Counter.js
+##### Counter.js (your durable object class)
 ```js
 import { IttyDurable } from 'itty-durable'
 
@@ -39,9 +47,9 @@ export class Counter extends IttyDurable {
 }
 ```
 
-##### Worker.js
+##### Worker.js (your standard CF worker)
 ```js
-import { ThrowableRouter, withParams } from 'itty-router-extras'
+import { ThrowableRouter, missing, withParams } from 'itty-router-extras'
 
 router
   // add upstream middleware, allowing Durable access
@@ -75,14 +83,15 @@ router
     ({ Counter, action, a, b }) => Counter.get('test')[action](Number(a), Number(b))
   )
 
-// 404 for everything else
-router.all('*', () => new Response('Not Found.', { status: 404 }))
+  // 404 for everything else
+  .all('*', () => missing('Are you sure about that?'))
 
-// attach the router "handle" to the event handler
-addEventListener('fetch', event =>
-  event.respondWith(router.handle(event.request))
-)
+// with itty, and using ES6 module syntax (required for DO), this is all you need
+export default {
+  fetch: router.handle
+}
 ```
+(more examples to come shortly, hang tight!)
 
 ## Features
 - Removes nearly all boilerplate from Durable Objects
@@ -116,14 +125,5 @@ This is the Worker middleware to put either on routes individually, up globally 
 [coveralls-image]:https://coveralls.io/repos/github/kwhitley/itty-durable/badge.svg?branch=v0.x
 [coveralls-url]:https://coveralls.io/github/kwhitley/itty-durable?branch=v0.x
 
-## Contributors
-These folks are the real heroes, making open source the powerhouse that it is!  Help out and get your name added to this list! <3
-
-#### Core, Concepts, and Codebase
-- [@technoyes](https://github.com/technoyes) - three kind-of-a-big-deal errors fixed.  Imagine the look on my face... thanks man!! :)
-- [@hunterloftis](https://github.com/hunterloftis) - router.handle() method now accepts extra arguments and passed them to route functions
-- [@roojay520](https://github.com/roojay520) - TS interface fixes
-- [@mvasigh](https://github.com/mvasigh) - proxy hacks courtesy of this chap
-#### Documentation Fixes
-- [@arunsathiya](https://github.com/arunsathiya)
-- [@poacher2k](https://github.com/poacher2k)
+## Special Thanks
+Big time thanks to all the fantastic developers on the Cloudflare Workers discord group, for their putting up with my constant questions, code snippets, and guiding me off the dangerous[ly flawed] path of async setters ;)
