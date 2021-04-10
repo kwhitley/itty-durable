@@ -1,6 +1,6 @@
 {
   "name": "itty-durable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Cloudflare Durable Objects + Itty Router = Shorter Code",
   "main": "./dist/itty-durable.min.js",
   "types": "./dist/itty-durable.d.ts",
