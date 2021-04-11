@@ -53,12 +53,15 @@ export class Counter extends IttyDurable {
 ```js
 import { ThrowableRouter, missing, withParams } from 'itty-router-extras'
 
+// export the durable class, per spec
+export { Counter } from './Counter'
+
 const router = ThrowableRouter({ base: '/counter' })
 
 router
-  // add upstream middleware, allowing Durable access
+  // add upstream middleware, allowing Durable access off the request
   .all('*', withDurables())
-  
+
   // get get the durable itself... returns json response, so no need to wrap
   .get('/', ({ Counter }) => Counter.get('test').toJSON())
 
@@ -104,6 +107,7 @@ GET /counter/reset                          => { counter: 0 }
 GET /counter/increment                      => { counter: 1 }
 GET /counter/increment                      => { counter: 2 }
 GET /counter/add/20/3                       => 23
+GET /counter                                => { counter: 2 }
 ```
 (more examples to come shortly, hang tight!)
 
