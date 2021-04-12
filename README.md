@@ -52,6 +52,7 @@ export class Counter extends IttyDurable {
 ##### Worker.js (your standard CF worker)
 ```js
 import { ThrowableRouter, missing, withParams } from 'itty-router-extras'
+import { withDurables } from 'itty-durable'
 
 // export the durable class, per spec
 export { Counter } from './Counter'
