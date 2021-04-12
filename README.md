@@ -12,6 +12,13 @@
 
 ## TLDR; [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) + [Itty Router](https://www.npmjs.com/package/itty-router) = [much shorter code](#example)
 
+## Features
+- Removes nearly all boilerplate from Durable Objects
+- Run instance methods directly on stub (will asynchronously call the same on Durable Object)
+- Optional persistance (on change)
+- Optional created/modified timestamps
+
+## Intro
 This takes the extreme stateful power of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) (now in open beta), but drastically cuts down on the boilerplate to use them by pairing it with the flexibility of [Itty Router](https://www.npmjs.com/package/itty-router).  Currently, the only way to communicate to durable objects (DO) is via fetch, requiring internal routing/handling of requests inside the DO, as well as building/passing the request in from a Worker or other DO in the first place.  On top of that, there are a couple steps to even get the instance "stub" to work with in the first place, before you can call `fetch` on it.
 
 IttyDurable offers a shortcut.
@@ -110,12 +117,6 @@ GET /counter/add/20/3                       => 23
 GET /counter                                => { counter: 2 }
 ```
 (more examples to come shortly, hang tight!)
-
-## Features
-- Removes nearly all boilerplate from Durable Objects
-- Allows you to fire instance methods directly on stub (will asynchronously call the same on Durable Object)
-- Optional persistance (on change)
-- Optional created/modified timestamps
 
 ## Exports
 
