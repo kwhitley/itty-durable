@@ -146,3 +146,7 @@ This is the Worker middleware to put either on routes individually, up globally 
 
 ## Special Thanks
 Big time thanks to all the fantastic developers on the Cloudflare Workers discord group, for their putting up with my constant questions, code snippets, and guiding me off the dangerous[ly flawed] path of async setters ;)
+
+## Contributors
+Let's face it, in open source, these are the real heroes... improving the quality of libraries out there for everyone!
+ - **README tweaks, fixes, improvements**: [@tomByrer](https://github.com/tomByrer)
