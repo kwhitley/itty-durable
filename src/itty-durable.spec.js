@@ -22,6 +22,31 @@ describe('IttyDurable', () => {
       const counter = new Counter()
       expect(counter.counter).toBe(0)
     })
+
+    describe('extends class with methods', () => {
+      const counter = new Counter()
+
+      it('.toJSON()', () => {
+        expect(typeof counter.toJSON).toBe('function')
+      })
+
+      it('.getPersistable()', () => {
+        expect(typeof counter.getPersistable).toBe('function')
+      })
+
+      it('.initialize()', () => {
+        expect(typeof counter.initialize).toBe('function')
+      })
+
+      it('.fetch()', () => {
+        expect(typeof counter.fetch).toBe('function')
+      })
+
+      it('.persist()', () => {
+        expect(typeof counter.persist).toBe('function')
+      })
+    })
+
   })
 })
 

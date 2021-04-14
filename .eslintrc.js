@@ -100,7 +100,7 @@ module.exports = {
         'max-depth': 'error',
         'max-len': 'off',
         'max-nested-callbacks': 'error',
-        'max-params': 'error',
+        'max-params': 'off',
         'multiline-ternary': 'error',
         'new-parens': 'error',
         'newline-before-return': 'error',
