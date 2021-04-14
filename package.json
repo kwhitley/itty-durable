@@ -1,6 +1,6 @@
 {
   "name": "itty-durable",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Cloudflare Durable Objects + Itty Router = Shorter Code",
   "main": "./index.js",
   "keywords": [
@@ -42,7 +42,7 @@
     "chalk": "^4.1.0",
     "coveralls": "^3.1.0",
     "eslint": "^7.24.0",
-    "eslint-plugin-jest": "^24.3.4",
+    "eslint-plugin-jest": "^24.3.5",
     "fs-extra": "^9.1.0",
     "gzip-size": "^6.0.0",
     "isomorphic-fetch": "^3.0.0",
@@ -54,6 +54,6 @@
   },
   "peerDependencies": {
     "itty-router": "^2.3.6",
-    "itty-router-extras": "^0.2.3"
+    "itty-router-extras": "^0.4.1"
   }
 }
