@@ -27,7 +27,7 @@ const createIttyDurable = (options = {}) => {
       // embed bindings into this.env
       for (const [key, binding] of Object.entries(env)) {
         this.$.env[key] = typeof binding.idFromName === 'function'
-                        ? proxyDurable(binding)
+                        ? proxyDurable(binding, `${key} from DO`)
                         : binding
       }
 

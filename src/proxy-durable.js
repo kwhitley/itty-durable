@@ -17,7 +17,7 @@ const transformResponse = response => {
 // takes the durable (e.g. env.Counter) and returns an object with { get(id) } to fetch the proxied stub
 const proxyDurable = (durable, options = {}) => {
   if (!durable || !durable.idFromName) {
-    throw new StatusError(500, 'Not a valid Durable Object binding.')
+    throw new StatusError(500, `${options.name || 'That'} is not a valid Durable Object binding.`)
   }
 
   return {

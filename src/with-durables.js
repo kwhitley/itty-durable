@@ -4,7 +4,7 @@ const withDurables = (options = {}) => (request, env) => {
   const { autoParse = false } = options
 
   request.durables = new Proxy(env, {
-    get: (obj, prop) => proxyDurable(obj[prop])
+    get: (obj, prop) => proxyDurable(obj[prop], { name: prop })
   })
 
   request.proxy = new Proxy(request.proxy || request, {
