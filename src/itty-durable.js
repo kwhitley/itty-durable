@@ -117,12 +117,12 @@ const createIttyDurable = (options = {}) => {
         })
       }
       await this.$.initializePromise
-      this.$.isDirty = false
     }
 
     async fetch(...args) {
       // INITIALIZATION
       await this.initialize()
+      this.$.isDirty = false
 
       // we pass off the request to the internal router
       const response = await this.router
