@@ -1,5 +1,5 @@
 
-const { StatusError } = require('itty-router-extras')
+const { json, StatusError } = require('itty-router-extras')
 
 // helper function to autoParse response
 const transformResponse = response => {
@@ -28,11 +28,10 @@ const proxyDurable = (durable, options = {}) => {
         }
 
         const stub = durable.get(id)
-        const mock = typeof Class === 'function' && new Class(request, env)
-        // const isValidMethod = prop => prop !== 'fetch'// && Object.getOwnPropertyNames(Class.prototype).includes('prop')
+        const mock = typeof Class === 'function' && new Class()
         const isValidMethod = prop => prop !== 'fetch' && (!mock || typeof mock[prop] === 'function')
 
-        const buildRequest = (type, prop, content) => new Request(`https://itty-durable/call/${prop}`, {
+        const buildRequest = (type, prop, content) => new Request(`https://itty-durable/${type}/${prop}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -41,7 +40,7 @@ const proxyDurable = (durable, options = {}) => {
         })
 
         const stubFetch = (obj, type, prop, content) => {
-          const theFetch = obj.fetch(buildRequest('call', prop, content))
+          const theFetch = obj.fetch(buildRequest(type, prop, content))
 
           return options.autoParse
           ? theFetch.then(transformResponse)

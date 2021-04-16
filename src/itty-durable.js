@@ -1,127 +1,157 @@
+const { Router } = require('itty-router')
 const {
   error,
   json,
   withParams,
   withContent,
-  ThrowableRouter,
   StatusError,
 } = require('itty-router-extras')
 
+const { proxyDurable } = require('./proxy-durable')
+
 const createIttyDurable = (options = {}) => {
   const {
-    timestamps = false,
     persistOnChange = true,
     alwaysReturnThis = true,
+    onError = err => error(err.status || 500, err.message),
   } = options
 
   return class IttyDurableBase {
-    constructor(state, env) {
-      this.state = state
+    constructor(state = {}, env = {}) {
       this.$ = {
-        defaultState: undefined
+        defaultState: undefined,
+        env: {},
+        state,
       }
 
-      this.router = ThrowableRouter()
+      // embed bindings into this.env
+      for (const [key, binding] of Object.entries(env)) {
+        this.$.env[key] = typeof binding.idFromName === 'function'
+                        ? proxyDurable(binding)
+                        : binding
+      }
+
+      // embed a throwable router into
+      this.router = Router()
+
+      const proxied = new Proxy(this, {
+        get: (obj, prop, receiver) => typeof obj[prop] === 'function'
+                            ? obj[prop].bind(receiver)
+                            : obj[prop],
+
+        // track isDirty
+        set: (obj, prop, value) => {
+          if (obj[prop] !== value) {
+            this.$.isDirty = true
+          }
+          obj[prop] = value
+
+          return true
+        }
+      })
 
       // one router to rule them all
       this.router
-        .post('/:action/:target', withParams, withContent, async (request, env) => {
-          const { action, target, content = [] } = request
-          request.originalState = this.toJSON()
+        .post('/:action/:target', withParams, withContent,
+          async (request, env) => {
+            const { action, target, content = [] } = request
+            // return json({ persistOnChange, alwaysReturnThis, action, target, content })
 
-          if (action === 'call') {
-            if (typeof this[target] !== 'function') {
-              throw new StatusError(500, `Durable Object ${this.constructor.name} does not contain method ${target}()`)
+            if (action === 'call') {
+              if (typeof this[target] !== 'function') {
+                throw new StatusError(500, `Durable Object ${this.constructor.name} does not contain method ${target}()`)
+              }
+              const response = await proxied[target](...content)
+
+              // return early if response detected
+              if (response) {
+                return response instanceof Response
+                ? response
+                : json(response)
+              }
+            } else if (action === 'set') {
+              proxied[target] = content
+            } else if (action === 'get-prop') {
+              return json(proxied[target])
             }
-            const response = await this[target](...content)
+          },
+          proxied.optionallyPersist,
+          proxied.optionallyReturnThis,
+        )
 
-            // return early if response detected
-            if (response) {
-              return response instanceof Response
-              ? response
-              : json(response)
-            }
-          } else if (action === 'set') {
-            this[target] = content
-          } else if (action === 'get-prop') {
-            const { target } = request
-            const persistable = this.getPersistable()
-
-            if (!persistable.hasOwnProperty(target)) throw new StatusError(500, `Property ${target} does not exist in ${this.constructor.name}`)
-
-            return json(this[target])
-          }
-        }, request => {
-          if (persistOnChange && this.toJSON() !== request.originalState) {
-            this.persist()
-          }
-        })
-
-      return new Proxy(this, {
-        get: (obj, prop) => typeof obj[prop] === 'function'
-                            ? obj[prop].bind(this)
-                            : obj[prop]
-      })
+      return proxied
     }
 
+    // gets persistable state (defaults to all but itty data)
     getPersistable() {
-      const { $, state, router, initializePromise, ...persistable } = this
+      const { $, router, ...persistable } = this
 
       return persistable
     }
 
+    // persists to storage, override to control
     async persist() {
-      if (timestamps) {
-        this.modified = new Date()
+      if (this.$.isDirty) {
+        await this.$.state.storage.put('data', this.getPersistable())
       }
-
-      await this.state.storage.put('data', {
-        ...this.getPersistable(),
-      })
     }
 
-    async initialize() {
-      this.$.defaultState = JSON.stringify(this.getPersistable())
+    async loadFromStorage() {
+      const stored = await this.$.state.storage.get('data') || {}
 
-      const stored = await this.state.storage.get('data') || {}
       Object.assign(this, stored)
 
-      if (timestamps) {
-        this.created = this.created || new Date()
-      }
+      this.$.isDirty = false
     }
 
-    async fetch(request, env) {
+    // initializes from storage, override to control
+    async initialize() {
       // INITIALIZATION
-      if (!this.initializePromise) {
-        this.initializePromise = this.initialize().catch(err => {
-          this.initializePromise = undefined
+      if (!this.$.initializePromise) {
+        // save default state before loading from storage
+        this.$.defaultState = JSON.stringify(this.getPersistable())
+
+        this.$.initializePromise = this.loadFromStorage().catch(err => {
+          this.$.initializePromise = undefined
           throw err
         })
       }
-      await this.initializePromise
+      await this.$.initializePromise
+      this.$.isDirty = false
+    }
 
-      // we pass off the request to the internal router (empty by default)
+    async fetch(...args) {
+      // INITIALIZATION
+      await this.initialize()
 
-      // add final catch-all route
-      if (alwaysReturnThis) {
-        this.router.all('*', () => json(this))
-      }
+      // we pass off the request to the internal router
+      const response = await this.router
+                                    .handle(...args)
+                                    .catch(onError)
 
-      const response = await this.router.handle(request, env)
-
+      // then return the response
       return response || error(400, 'Bad request to durable object')
     }
 
-    clear() {
+    async optionallyPersist() {
+      if (persistOnChange) {
+        await this.persist()
+      }
+    }
+
+    reset() {
       for (const key in this.getPersistable()) {
-        if (key !== 'created' || !timestamps) {
-          Reflect.deleteProperty(this, key)
-        }
+        Reflect.deleteProperty(this, key)
       }
 
       // reset to defaults from constructor
       Object.assign(this, JSON.parse(this.$.defaultState))
+    }
+
+    optionallyReturnThis() {
+      if (alwaysReturnThis) {
+        return json(this)
+      }
     }
 
     toJSON() {
