@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "name": "itty-durable-example",
+  "version": "0.1.0",
+  "description": "Example repo for itty-durable",
+  "module": "./dist/index.mjs",
+  "scripts": {
+    "deploy": "wrangler publish",
+    "build": "esbuild index.js --format=esm --bundle --outfile=dist/index.mjs"
+  },
+  "author": "Kevin Whitley <krwhitley@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/wrangler": "=1.15.0-custom-builds-rc.2",
+    "esbuild": "^0.11.11",
+    "prettier": "^2.2.1"
+  },
+  "dependencies": {
+    "itty-durable": "^0.3.0",
+    "itty-router": "^2.3.6",
+    "itty-router-extras": "^0.4.2"
+  }
+}
