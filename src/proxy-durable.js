@@ -1,7 +1,6 @@
-
 const { json, StatusError } = require('itty-router-extras')
 
-// helper function to autoParse response
+// helper function to parse response
 const transformResponse = response => {
   try {
     return response.json()
@@ -15,20 +14,22 @@ const transformResponse = response => {
 }
 
 // takes the durable (e.g. env.Counter) and returns an object with { get(id) } to fetch the proxied stub
-const proxyDurable = (durable, options = {}) => {
+const proxyDurable = (durable, middlewareOptions = {}) => {
   if (!durable || !durable.idFromName) {
-    throw new StatusError(500, `${options.name || 'That'} is not a valid Durable Object binding.`)
+    throw new StatusError(500, `${middlewareOptions.name || 'That'} is not a valid Durable Object binding.`)
   }
 
   return {
-    get: (id, Class = options.class) => {
+    get: (id, options = {}) => {
+      options = { ...middlewareOptions, ...options }
+
       try {
         if (typeof id === 'string') {
           id = durable.idFromName(id)
         }
 
         const stub = durable.get(id)
-        const mock = typeof Class === 'function' && new Class()
+        const mock = typeof options.class === 'function' && new options.class()
         const isValidMethod = prop => prop !== 'fetch' && (!mock || typeof mock[prop] === 'function')
 
         const buildRequest = (type, prop, content) => new Request(`https://itty-durable/${type}/${prop}`, {
@@ -40,9 +41,18 @@ const proxyDurable = (durable, options = {}) => {
         })
 
         const stubFetch = (obj, type, prop, content) => {
+          // return json({
+          //   middlewareOptions,
+          //   stub, mock,
+          //   options,
+          //   class: typeof options.Class,
+          //   parse: options.parse,
+          //   obj, type, prop, content,
+          // })
+
           const theFetch = obj.fetch(buildRequest(type, prop, content))
 
-          return options.autoParse
+          return options.parse
           ? theFetch.then(transformResponse)
           : theFetch
         }

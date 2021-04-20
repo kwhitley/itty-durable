@@ -1,4 +1,4 @@
-import { IttyDurable } from './itty-durable'
+import { IttyDurable } from '../../src' // from 'itty-durable'
 import { missing, error } from 'itty-router-extras'
 import { Counter as CounterClass } from './Counter'
 

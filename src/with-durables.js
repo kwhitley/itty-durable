@@ -1,17 +1,30 @@
-const { proxyDurable } = require('./proxy-durable')
+import { proxyDurable } from './proxy-durable'
+import { StatusError, json } from 'itty-router-extras'
+
+// returns true if binding appears to be a durable binding
+const isDurable = binding => typeof binding.idFromName === 'function'
 
 const withDurables = (options = {}) => (request, env) => {
-  const { autoParse = false } = options
+  const {
+    parse = false,
+    classes = {},
+  } = options
+  request.durables = request.durables || {}
 
-  request.durables = new Proxy(env, {
-    get: (obj, prop) => proxyDurable(obj[prop], { name: prop })
-  })
+  for (var [key, binding] of Object.entries(env)) {
+    if (isDurable(binding)) {
+      const proxied = proxyDurable(binding, {
+        name: key,
+        class: classes[key], // pass in class key by default
+      })
 
-  request.proxy = new Proxy(request.proxy || request, {
-    get: (obj, prop) => obj.hasOwnProperty(prop)
-                        ? obj[prop]
-                        : obj.durables[prop]
-  })
+      try {
+        request[key] = request.durables[key] = proxied
+      } catch (err) {
+        throw new StatusError(500, `Could not set Durable binding "${key}" on Request`)
+      }
+    }
+  }
 }
 
 module.exports = { withDurables }

@@ -4,8 +4,8 @@ name = "your-script-name"
 type = "javascript"
 workers_dev = false
 routes = [
-  "example.com/counter/*",
-  "example.com/counter"
+  "example.com/simple-counter/*",
+  "example.com/simple-counter"
 ]
 
 [durable_objects]
