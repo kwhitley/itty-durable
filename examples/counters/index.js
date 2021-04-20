@@ -1,9 +1,6 @@
 import {
-  error,
-  json,
   missing,
   StatusError,
-  text,
   ThrowableRouter,
   withParams,
 } from 'itty-router-extras'
@@ -16,7 +13,7 @@ import { Counters } from './Counters'
 // export durable object class, per spec
 export { Counter, Counters }
 
-const router = ThrowableRouter({ base: '/itty-durable/counters', stack: true })
+const router = ThrowableRouter({ base: '/counters', stack: true })
 
 // middleware to check existance of counter before continuing
 const withExistingCounters = async ({ params, Counters }) => {

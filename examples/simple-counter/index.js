@@ -35,14 +35,14 @@ router
       ])
 
       // all instance calls return a promise to a JSON-formatted Response
-      // unless withDurables({ autoParse: true }) is used
+      // unless withDurables({ parse: true }) is used
       return counter.toJSON()
     }
   )
 
   // will pass on requests to the durable... (e.g. /add/3/4 => 7)
   .get('/:action/:a?/:b?', withParams,
-    ({ Counter, action, a, b }) => Counter.get('test')[action](Number(a), Number(b))
+    ({ Counter, action, a, b }) => Counter.get('test')[action](a, b)
   )
 
   // all else gets a 404

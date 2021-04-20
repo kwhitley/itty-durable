@@ -35,7 +35,7 @@ export class Counters extends IttyDurable {
     }
 
     // clear out counter storage
-    await Counter.get(id).destroy()
+    await Counter.get(id).destroy({ reset: true })
 
     // then remove it from list
     this.counters = this.counters.filter(key => key !== id)
@@ -46,7 +46,7 @@ export class Counters extends IttyDurable {
     const { Counter } = this.state // get another durable stub
 
     // remove all counter storages
-    await Promise.all(this.counters.map(id => Counter.get(id).destroy()))
+    await Promise.all(this.counters.map(id => Counter.get(id).destroy({ reset: true })))
 
     this.counters = []
   }

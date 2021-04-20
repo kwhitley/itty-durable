@@ -153,8 +153,15 @@ const createIttyDurable = (options = {}) => {
       Object.assign(this, JSON.parse(this.state.defaultState))
     }
 
-    destroy() {
-      return this.storage.deleteAll()
+    // purge storage, and optionally reset internal memory state
+    async destroy(options = {}) {
+      const { reset = false } = options
+
+      await this.storage.deleteAll()
+
+      if (reset) {
+        this.reset()
+      }
     }
 
     optionallyReturnThis() {
