@@ -47,14 +47,16 @@ describe('IttyDurable', () => {
       })
     })
 
-    describe('embeds state and env from request', () => {
-      const state = { state: '' }
-      const env = { env: '' }
+    describe('embeds state and env into this.state', () => {
+      const STATE_VALUE = 'some state value'
+      const ENV_VALUE = 'some env value'
+      const state = { STATE_VALUE }
+      const env = { ENV_VALUE }
 
       const counter = new Counter(state, env)
 
-      expect(counter.$.state).toEqual(state)
-      expect(counter.$.env).toEqual(env)
+      expect(counter.state.STATE_VALUE).toEqual(STATE_VALUE)
+      expect(counter.state.ENV_VALUE).toEqual(ENV_VALUE)
     })
 
     describe('leaves access to the router', () => {

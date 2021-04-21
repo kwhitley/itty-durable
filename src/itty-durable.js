@@ -166,7 +166,9 @@ const createIttyDurable = (options = {}) => {
 
     optionallyReturnThis() {
       if (alwaysReturnThis) {
-        return json(this.toJSON ? this.toJSON() : this)
+        return json(this.toJSON
+                    ? this.toJSON()
+                    : this)
       }
     }
 
