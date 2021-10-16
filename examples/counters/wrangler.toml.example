@@ -14,10 +14,8 @@ bindings = [
 ]
 
 [build]
-upload_format = "modules"
 command = "npm install && npm run build"
-cwd = "."
-watch_dir = "src"
-upload_dir = "dist"
-upload_include = []
-upload_exclude = ["*.map"]
+
+[build.upload]
+format = "modules"
+main = "index.mjs"
