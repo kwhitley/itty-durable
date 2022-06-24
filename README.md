@@ -69,6 +69,9 @@ router
   // get the durable itself... returns json response, so no need to wrap
   .get('/', ({ Counter }) => Counter.get('test').toJSON())
 
+  // get the durable itself... returns json response, so no need to wrap
+  .get('/increment', ({ Counter }) => Counter.get('test').increment())
+
   // example route with multiple calls to DO
   .get('/increment-a-few-times',
     async ({ Counter }) => {
@@ -86,13 +89,13 @@ router
     }
   )
 
-  // reset the durable)
-  .get('/reset', ({ Counter }) => Counter.get('test').reset())
-
   // will pass on unknown requests to the durable... (e.g. /counter/add/3/4 => 7)
-  .get('/:action/:a?/:b?', withParams,
-    ({ Counter, action, a, b }) => Counter.get('test')[action](Number(a), Number(b))
+  .get('/add/:a?/:b?', withParams,
+    ({ Counter, a, b }) => Counter.get('test').add(Number(a), Number(b))
   )
+
+  // reset the durable
+  .get('/reset', ({ Counter }) => Counter.get('test').reset())
 
   // 404 for everything else
   .all('*', () => missing('Are you sure about that?'))
@@ -117,14 +120,11 @@ GET /counter                                => { counter: 2 }
 
 ## Exports
 
-### `IttyDurable: class`
-Base class to extend, with persistOnChange, but no timestamps.
+### `createDurable(options?: object): class`
+Factory function to create the IttyDurable class (with options) for your Durable Object to extend.
 
-### `createIttyDurable(options = {}): class`
-Factory function for defining another IttyDurable class (different base options).
-
-### `withDurables(options = {})`
-This is the Worker middleware to put either on routes individually, up globally as an upstream route.  This allows requests for the DO binding directly off the request, and simplifies even the id translation.  Any durable stubs retrieved this way automatically talk to the router within IttyDurable (base class) when accessing instance methods on the stub, allowing all `fetch` boilerplate to be abstracted away.
+### `withDurables(options?: object): function`
+Highly-recommended middleware to embed itty-durable stubs into the request.  Using these stubs allows you to skip manually creating/sending requests or handling response parsing.
 
 [twitter-image]:https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fitty-durable
 [logo-image]:https://user-images.githubusercontent.com/865416/114285361-2bd3e180-9a1c-11eb-8386-a2e9f4383d43.png

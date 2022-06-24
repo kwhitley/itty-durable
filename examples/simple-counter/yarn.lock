@@ -7,10 +7,10 @@ esbuild@^0.11.11:
   resolved "https://registry.yarnpkg.com/esbuild/-/esbuild-0.11.23.tgz#c42534f632e165120671d64db67883634333b4b8"
   integrity sha512-iaiZZ9vUF5wJV8ob1tl+5aJTrwDczlvGP0JoMmnpC2B0ppiMCu8n8gmy5ZTGl5bcG081XBVn+U+jP+mPFm5T5Q==
 
-itty-durable@=0.4.0-next.0:
-  version "0.4.0-next.0"
-  resolved "https://registry.yarnpkg.com/itty-durable/-/itty-durable-0.4.0-next.0.tgz#2e68d661961675cb69b998d63e1bcbd3625e34ba"
-  integrity sha512-MJlwdLmPLvbhkOWWnUq3fGY07C/vt+Tt+97IEsF7Z0Ir8OwLIarHdbzxvOeOHKnOgOdcURpeEhA7lCCZ2R8vbg==
+itty-durable@=0.4.0-next.1:
+  version "0.4.0-next.1"
+  resolved "https://registry.yarnpkg.com/itty-durable/-/itty-durable-0.4.0-next.1.tgz#d122e1495dfccd167271864040e093be4d7d9a3a"
+  integrity sha512-ht/nNokztjKoUsQQoxVdlSDRZRPOIqfQgSmzpaNmtUfxTGQZkYdwYqoq18YhEJGkoC0OIMpz/dwEophfcBv4SA==
   dependencies:
     itty-router "^2.6.1"
     itty-router-extras "^0.4.2"

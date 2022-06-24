@@ -1,6 +1,6 @@
-import { createIttyDurable } from '../../../src' // from 'itty-durable'
+import { createDurable } from '../../../src' // from 'itty-durable'
 
-export class Counter extends createIttyDurable({ autoReturn: true }) {
+export class Counter extends createDurable({ autoReturn: true, autoPersist: true }) {
   constructor(state, env) {
     super(state, env)
     this.counter = 0

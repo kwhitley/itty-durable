@@ -1,10 +1,10 @@
 require('isomorphic-fetch')
 
-import { createIttyDurable } from './itty-durable'
+import { createDurable } from './itty-durable'
 
-describe('createIttyDurable', () => {
+describe('createDurable', () => {
   describe('works as base class factory function for Durable Object classes', () => {
-    class Counter extends createIttyDurable() {
+    class Counter extends createDurable() {
       constructor(state, env) {
         super(state, env)
         this.counter = 0
@@ -93,7 +93,7 @@ describe('createIttyDurable', () => {
       })
 
       it('is overridable', () => {
-        class CustomCounter extends createIttyDurable() {
+        class CustomCounter extends createDurable() {
           constructor(state, env) {
             super(state, env)
             this.counter = 1

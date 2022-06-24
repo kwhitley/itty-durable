@@ -9,7 +9,7 @@ import {
 import { proxyDurable } from './proxy-durable'
 
 // factory function for IttyDurable with custom options
-export const createIttyDurable = (options = {}) => {
+export const createDurable = (options = {}) => {
   const {
     autoPersist = false,
     autoReturn = false,

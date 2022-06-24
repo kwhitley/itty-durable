@@ -11,7 +11,7 @@
     "prettier": "^2.2.1"
   },
   "dependencies": {
-    "itty-durable": "=0.4.0-next.0",
+    "itty-durable": "=0.4.0-next.1",
     "itty-router": "^2.5.0",
     "itty-router-extras": "^0.4.2"
   }
