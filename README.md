@@ -10,11 +10,16 @@
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
 
-Drastically simplifies usage of simple [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing lightweight Durable Object definitions and direct access to object methods from within Workers (no need for request building/handling).
+Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing lightweight object definitions and **direct access** to object methods from within Workers (no need for request building/handling).
 
 ## Features
 - Removes nearly all boilerplate from writing Durable Objects and using them within Workers
-- Optional persistance (on change)
+- Automatically handles request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router)
+- Universal middleware to add object proxies to Request (built for use with [itty-router](https://www.npmjs.com/package/itty-router), but should work with other Worker routers).
+- Optional, automatic non-blocking persistance (persists after object response, and loads from storage automatically)
+- Optionally return Durable contents from methods without explicit return (convenience feature)
+- Control how contents of Durable look to outside requests
+- Control what, if anything, is persisted
 
 ## Installation
 
@@ -27,17 +32,23 @@ npm install itty-durable
 ```js
 import { createIttyDurable } from 'itty-durable'
 
-export class Counter extends createIttyDurable() {
+export class Counter extends createIttyDurable({ autoReturn: true }) {
   constructor(state, env) {
     super(state, env)
+
+    // anything defined here is only used for initialization (if not loaded from storage)
     this.counter = 0
   }
 
   increment() {
     this.counter++
+
+    // because this function does not return anything, it will return the entire contents
+    // Example: { counter: 1 }
   }
 
   add(a, b) {
+    // a function can explicitly return something insead
     return a + b
   }
 }
@@ -78,7 +89,7 @@ router
   )
 
   // reset the durable)
-  .get('/reset', ({ Counter }) => Counter.get('test').clear())
+  .get('/reset', ({ Counter }) => Counter.get('test').reset())
 
   // will pass on unknown requests to the durable... (e.g. /counter/add/3/4 => 7)
   .get('/:action/:a?/:b?', withParams,
