@@ -108,7 +108,7 @@ This library works via a two part process:
 npm install itty-durable
 ```
 
-## API
+# API
 
 ### `createDurable(options?: object): class`
 Factory function to create the IttyDurable class (with options) for your Durable Object to extend.
@@ -124,6 +124,8 @@ Highly-recommended middleware to embed itty-durable stubs into the request.  Usi
 | Option | Type(s) | Default | Description |
 | --- | --- | --- | --- |
 | **parse** | `boolean` | false | By default, the stub methods return a Promise to the Response from the Durable Object itself.  This is great if you're just passing the response along and don't want to modify it.  To take more control, setting this to `true` will instead return a Promise to the parsed JSON contents instead.  To then respond to requests, you would have to handle building of a JSON Response yourself (e.g. `json()` within itty-router-extras).
+
+---
 
 [twitter-image]:https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Fwww.npmjs.com%2Fpackage%2Fitty-durable
 [logo-image]:https://user-images.githubusercontent.com/865416/114285361-2bd3e180-9a1c-11eb-8386-a2e9f4383d43.png
