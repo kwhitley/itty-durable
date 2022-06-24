@@ -1,7 +1,7 @@
 # ![itty-durable](https://user-images.githubusercontent.com/865416/175660491-4f428e41-47f5-4d43-92d3-02ce29309878.png)
 
 [![npm package][npm-image]][npm-url]
-[![Build Status][travis-image]][travis-url]
+![Build Status](https://github.com/kwhitley/itty-router/actions/workflows/verify.yml/badge.svg)
 [![Open Issues][issues-image]][issues-url]
 <a href="https://github.com/kwhitley/itty-durable" target="\_parent">
   <img alt="" src="https://img.shields.io/github/stars/kwhitley/itty-durable.svg?style=social&label=Star" />
@@ -13,11 +13,11 @@
 Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing **lightweight object definitions** and **direct access** to object methods from within Workers (no need for request building/handling).
 
 ## Features
-- Removes nearly all boilerplate from using Durable Objects, by automatically handling request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router)
-- Optional, automatic non-blocking persistance layer
-- Optionally return Durable contents from methods without explicit return (convenience feature)
-- Control how contents of Durable look to outside requests
-- Control what, if anything, is persisted
+- Removes nearly all boilerplate from using Durable Objects, by automatically handling request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router).
+- Optional automatic non-blocking persistance layer
+- Optionally return contents from methods without explicit return (convenience feature)
+- Control how contents of object looks to outside requests
+- Control exactly what, if anything, is persisted
 
 ## Installation
 
