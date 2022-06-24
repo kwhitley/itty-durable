@@ -21,6 +21,7 @@ export const createIttyDurable = (options = {}) => {
       this.state = {
         defaultState: undefined,
         initialized: false,
+        router: Router(),
         ...env,
         ...state,
       }
@@ -32,9 +33,7 @@ export const createIttyDurable = (options = {}) => {
                         : binding
       }
 
-      // embed a throwable router into
-      this.router = Router()
-
+      // creates a proxy of this to return
       const proxied = new Proxy(this, {
         get: (obj, prop, receiver) => typeof obj[prop] === 'function'
                             ? obj[prop].bind(receiver)
@@ -48,14 +47,14 @@ export const createIttyDurable = (options = {}) => {
       })
 
       // one router to rule them all
-      this.router
+      this.state.router
         .post('/:action/:target', withParams, withContent,
           async (request, env) => {
             const { action, target, content = [] } = request
 
             if (action === 'call') {
               if (typeof this[target] !== 'function') {
-                throw new StatusError(500, `Durable Object ${this.constructor.name} does not contain method ${target}()`)
+                throw new StatusError(500, `Durable Object state{this.constructor.name} does not contain method state{target}()`)
               }
               const response = await proxied[target](...content)
 
@@ -91,14 +90,16 @@ export const createIttyDurable = (options = {}) => {
     // fetch method is the expected interface method of Durable Objects per Cloudflare spec
     async fetch(...args) {
       // save default state for reset
-      this.saveDefaultState()
+      if (!this.state.initialized) {
+        this.state.defaultState = JSON.stringify(this.getPersistable())
+      }
 
       await this.loadFromStorage()
 
       // we pass off the request to the internal router
-      const response = await this.router
-                                    .handle(...args)
-                                    .catch(onError)
+      const response = await this.state.router
+                                      .handle(...args)
+                                      .catch(onError)
 
       // if persistOnChange is true, we persist on every response
       if (persistOnChange) {
@@ -111,7 +112,7 @@ export const createIttyDurable = (options = {}) => {
 
     // gets persistable state (defaults to all but itty data)
     getPersistable() {
-      const { state, router, ...persistable } = this
+      const { state, ...persistable } = this
 
       return persistable
     }
@@ -136,11 +137,16 @@ export const createIttyDurable = (options = {}) => {
 
     // persists to storage, override to control
     async persist() {
-      await this.state.storage.put('data', this.getPersistable())
+      const { state, ...persistable } = this.getPersistable()
+
+      await this.state.storage.put('data', persistable)
     }
 
-    reset() {
-      for (const key in this.getPersistable()) {
+    // resets object to preserved default state
+    async reset() {
+      const { state, ...persistable } = this.getPersistable()
+
+      for (const key in persistable) {
         Reflect.deleteProperty(this, key)
       }
 
@@ -148,14 +154,11 @@ export const createIttyDurable = (options = {}) => {
       Object.assign(this, JSON.parse(this.state.defaultState))
     }
 
-    saveDefaultState() {
-      if (!this.state.initialized) {
-        this.state.defaultState = JSON.stringify(this.getPersistable())
-      }
-    }
-
+    // defaults to returning all content
     toJSON() {
-      return this.getPersistable()
+      const { state, ...other } = this
+
+      return other
     }
   }
 }

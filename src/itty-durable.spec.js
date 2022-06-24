@@ -13,7 +13,7 @@ describe('createIttyDurable', () => {
 
     it('embeds this.router', () => {
       const counter = new Counter()
-      expect(typeof counter.router.post).toBe('function')
+      expect(typeof counter.state.router.post).toBe('function')
     })
 
     it('instantiates normally (props from constructor)', () => {
@@ -32,7 +32,6 @@ describe('createIttyDurable', () => {
         'optionallyReturnThis',
         'persist',
         'reset',
-        'saveDefaultState',
         'toJSON',
       ]
 
@@ -78,7 +77,7 @@ describe('createIttyDurable', () => {
     describe('leaves access to the router', () => {
       const counter = new Counter()
 
-      expect(typeof counter.router).toBe('object')
+      expect(typeof counter.state.router).toBe('object')
     })
 
     describe('getPersistable()', () => {

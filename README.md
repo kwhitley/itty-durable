@@ -14,7 +14,7 @@ Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/int
 
 ## Features
 - Removes nearly all boilerplate from using Durable Objects, by automatically handling request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router)
-- Optional, automatic non-blocking persistance (persists after object response, and loads from storage automatically)
+- Optional, automatic non-blocking persistance layer
 - Optionally return Durable contents from methods without explicit return (convenience feature)
 - Control how contents of Durable look to outside requests
 - Control what, if anything, is persisted
