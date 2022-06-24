@@ -4,7 +4,7 @@ import {
   ThrowableRouter,
   withParams,
 } from 'itty-router-extras'
-import { withDurables } from '../../src' // from 'itty-durable'
+import { withDurables } from '../../../src' // from 'itty-durable'
 
 // import durable object classes to pass to withDurables middleware (only when accessing instance props)
 import { Counter } from './Counter'

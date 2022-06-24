@@ -8,13 +8,11 @@
   "author": "Kevin Whitley <krwhitley@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.14.25",
-    "prettier": "^2.2.1"
+    "esbuild": "^0.14.47",
+    "prettier": "^2.7.1"
   },
   "dependencies": {
-    "copy-webpack-plugin": "^9.0.1",
-    "itty-durable": "^1.0.0",
-    "itty-router": "^2.3.6",
+    "itty-router": "^2.6.1",
     "itty-router-extras": "^0.4.2"
   }
 }

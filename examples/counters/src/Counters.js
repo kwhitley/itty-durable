@@ -1,4 +1,4 @@
-import { IttyDurable } from '../../src' // from 'itty-durable'
+import { createIttyDurable } from '../../../src' // from 'itty-durable'
 import { missing, error } from 'itty-router-extras'
 import { Counter as CounterClass } from './Counter'
 
@@ -6,7 +6,7 @@ import { Counter as CounterClass } from './Counter'
 const ascending = (a, b) => a > b ? 1 : -1
 
 // this is just a list of counter (ids) with helper functions to check existance, create, delete, etc
-export class Counters extends IttyDurable {
+export class Counters extends createIttyDurable({ autoReturn: true }) {
   constructor(...args) {
     super(...args)
     this.counters = []
