@@ -64,27 +64,10 @@ router
   // get the durable itself... returns json response, so no need to wrap
   .get('/', ({ Counter }) => Counter.get('test').toJSON())
 
-  // get the durable itself... returns json response, so no need to wrap
+  // By using { autoReturn: true } in createDurable(), this method returns the contents
   .get('/increment', ({ Counter }) => Counter.get('test').increment())
 
-  // example route with multiple calls to DO
-  .get('/increment-a-few-times',
-    async ({ Counter }) => {
-      const counter = Counter.get('test') // gets DO with id/namespace = 'test'
-
-      // then we fire some methods on the durable... these could all be done separately.
-      await Promise.all([
-        counter.increment(),
-        counter.increment(),
-        counter.increment(),
-      ])
-
-      // and return the contents (it'll be a json response)
-      return counter.toJSON()
-    }
-  )
-
-  // will pass on unknown requests to the durable... (e.g. /counter/add/3/4 => 7)
+  // you can pass any serializable params to a method... (e.g. /counter/add/3/4 => 7)
   .get('/add/:a?/:b?', withParams,
     ({ Counter, a, b }) => Counter.get('test').add(Number(a), Number(b))
   )
@@ -103,13 +86,12 @@ export default {
 /*
 Example Interactions:
 
-GET /counter/increment-a-few-times          => { counter: 3 }
-GET /counter/increment-a-few-times          => { counter: 6 }
-GET /counter/reset                          => { counter: 0 }
+GET /counter                                => { counter: 0 }
 GET /counter/increment                      => { counter: 1 }
 GET /counter/increment                      => { counter: 2 }
+GET /counter/increment                      => { counter: 3 }
+GET /counter/reset                          => { counter: 0 }
 GET /counter/add/20/3                       => 23
-GET /counter                                => { counter: 2 }
 */
 ```
 
