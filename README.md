@@ -18,6 +18,7 @@ Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/int
 - Optionally return contents from methods without explicit return (convenience feature)
 - Control how contents of object looks to outside requests
 - Control exactly what, if anything, is persisted
+- Already being used in production on high-availability/throughput apps like the [Retheme](http://retheme.org/) browser extension!
 
 ## Example
 ##### Counter.js (your Durable Object class)
