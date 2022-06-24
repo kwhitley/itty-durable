@@ -108,7 +108,7 @@ This library works via a two part process:
 npm install itty-durable
 ```
 
-## API
+# API
 
 ### `createDurable(options?: object): class`
 Factory function to create the IttyDurable class (with options) for your Durable Object to extend.
