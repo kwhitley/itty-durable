@@ -10,7 +10,7 @@
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
 
-Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) = [much shorter code](#example)
+Drastically simplifies usage of simple [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing lightweight Durable Object definitions and direct access to object methods from within Workers (no need for request building/handling).
 
 ## Features
 - Removes nearly all boilerplate from writing Durable Objects and using them within Workers
