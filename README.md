@@ -1,4 +1,4 @@
-# ![Itty Durable][logo-image]
+# ![itty-durable](https://user-images.githubusercontent.com/865416/175660491-4f428e41-47f5-4d43-92d3-02ce29309878.png)
 
 [![npm package][npm-image]][npm-url]
 [![Build Status][travis-image]][travis-url]
@@ -10,37 +10,24 @@
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
 
-## TLDR; [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) + [Itty Router](https://www.npmjs.com/package/itty-router) = [much shorter code](#example)
+## Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) = [much shorter code](#example)
 
 ## Features
-- Removes nearly all boilerplate from Durable Objects
-- Run instance methods directly on stub (will asynchronously call the same on Durable Object)
+- Removes nearly all boilerplate from writing Durable Objects and using them within Workers
 - Optional persistance (on change)
-- Optional created/modified timestamps
-
-## Intro
-This takes the extreme stateful power of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/) (now in open beta), but drastically cuts down on the boilerplate to use them by pairing it with the flexibility of [Itty Router](https://www.npmjs.com/package/itty-router).  Currently, the only way to communicate to durable objects (DO) is via fetch, requiring internal routing/handling of requests inside the DO, as well as building/passing the request in from a Worker or other DO in the first place.  On top of that, there are a couple steps to even get the instance "stub" to work with in the first place, before you can call `fetch` on it.
-
-IttyDurable offers a shortcut.
-
-By having your durable objects extend the `IttyDurable` base class, it creates automatic internal routing/fetch handling via a tiny, embedded [Itty Router](https://www.npmjs.com/package/itty-router).  This allows you to ignore the initialization (from storage) step, as well as the `fetch` call itself from inside the DO, instead using the internal router for access/flow.
-
-By adding in the next piece, the `withDurables()` middleware to the calling router (the outside Worker usually), we make this even more elegant.  Now, you can typically ignore the durable object router entirely, and instead call methods (or await properties) directly on the stub itself.  Under the hood, this fires a fetch that the built-in router will handle, firing the appropriate method, and passing (json-parsable) arguments in from the request.
-
-**DISCLAIMER: This is very much a "working prototype" and will be hardened over the coming weeks with the help of folks on the CF Discord group, and your feedback (in issues).  API changes, polls, etc will be broadcast on the #durable-objects channel of that server, as well as on [Twitter](https://twitter.com/kevinrwhitley).  Please follow along there (or follow me) for updates and to communicate feedback!  Additionally, I'll be putting together a screencast/explanation on YouTube to show how it works - hopefully that can inspire someone else to come along and make it even better!**
 
 ## Installation
 
 ```
-npm install itty-durable itty-router itty-router-extras
+npm install itty-durable
 ```
 
 ## Example
 ##### Counter.js (your durable object class)
 ```js
-import { IttyDurable } from 'itty-durable'
+import { createIttyDurable } from 'itty-durable'
 
-export class Counter extends IttyDurable {
+export class Counter extends createIttyDurable() {
   constructor(state, env) {
     super(state, env)
     this.counter = 0
