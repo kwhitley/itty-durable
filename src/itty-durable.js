@@ -102,7 +102,7 @@ export const createIttyDurable = (options = {}) => {
                                       .catch(onError)
 
       // if persistOnChange is true, we persist on every response
-      if (persistOnChange) {
+      if (autoPersist) {
         this.persist()
       }
 
