@@ -16,7 +16,7 @@ export const createIttyDurable = (options = {}) => {
     onError = err => error(err.status || 500, err.message),
   } = options
 
-  return class IttyDurableBase {
+  return class IttyDurable {
     constructor(state = {}, env = {}) {
       this.state = {
         defaultState: undefined,
