@@ -1,12 +1,10 @@
 require('isomorphic-fetch')
 
-const { Router } = require('itty-router')
-const { withDurables } = require('./with-durables')
-const { createIttyDurable, IttyDurable } = require('./itty-durable')
+import { createIttyDurable } from './itty-durable'
 
-describe('IttyDurable', () => {
-  describe('works as base class for Durable Object classes', () => {
-    class Counter extends IttyDurable {
+describe('createIttyDurable', () => {
+  describe('works as base class factory function for Durable Object classes', () => {
+    class Counter extends createIttyDurable() {
       constructor(state, env) {
         super(state, env)
         this.counter = 0
@@ -26,25 +24,43 @@ describe('IttyDurable', () => {
     describe('extends class with methods', () => {
       const counter = new Counter()
 
-      it('.toJSON()', () => {
-        expect(typeof counter.toJSON).toBe('function')
-      })
+      const expectedMethods = [
+        'destroy',
+        'fetch',
+        'getPersistable',
+        'loadFromStorage',
+        'optionallyReturnThis',
+        'persist',
+        'reset',
+        'saveDefaultState',
+        'toJSON',
+      ]
 
-      it('.getPersistable()', () => {
-        expect(typeof counter.getPersistable).toBe('function')
-      })
+      for (const method of expectedMethods) {
+        it(`extends class with method "${method}"`, () => {
+          expect(typeof counter[method]).toBe('function')
+        })
+      }
 
-      it('.initialize()', () => {
-        expect(typeof counter.initialize).toBe('function')
-      })
+      // it('.toJSON()', () => {
+      //   expect(typeof counter.toJSON).toBe('function')
+      // })
 
-      it('.fetch()', () => {
-        expect(typeof counter.fetch).toBe('function')
-      })
+      // it('.destroy()', () => {
+      //   expect(typeof counter.destroy).toBe('function')
+      // })
 
-      it('.persist()', () => {
-        expect(typeof counter.persist).toBe('function')
-      })
+      // it('.getPersistable()', () => {
+      //   expect(typeof counter.getPersistable).toBe('function')
+      // })
+
+      // it('.fetch()', () => {
+      //   expect(typeof counter.fetch).toBe('function')
+      // })
+
+      // it('.persist()', () => {
+      //   expect(typeof counter.persist).toBe('function')
+      // })
     })
 
     describe('embeds state and env into this.state', () => {
@@ -78,7 +94,7 @@ describe('IttyDurable', () => {
       })
 
       it('is overridable', () => {
-        class CustomCounter extends IttyDurable {
+        class CustomCounter extends createIttyDurable() {
           constructor(state, env) {
             super(state, env)
             this.counter = 1

@@ -1,6 +1,6 @@
 require('isomorphic-fetch')
 
-const { proxyDurable } = require('./proxy-durable')
+import { proxyDurable } from './proxy-durable'
 
 describe('proxyDurable(durable:object, options?:object)', () => {
   it('returns an object with .get(id)', () => {

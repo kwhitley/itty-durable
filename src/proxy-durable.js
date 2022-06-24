@@ -1,4 +1,4 @@
-const { json, StatusError } = require('itty-router-extras')
+import { json, StatusError } from 'itty-router-extras'
 
 // helper function to parse response
 const transformResponse = response => {
@@ -14,7 +14,7 @@ const transformResponse = response => {
 }
 
 // takes the durable (e.g. env.Counter) and returns an object with { get(id) } to fetch the proxied stub
-const proxyDurable = (durable, middlewareOptions = {}) => {
+export const proxyDurable = (durable, middlewareOptions = {}) => {
   if (!durable || !durable.idFromName) {
     throw new StatusError(500, `${middlewareOptions.name || 'That'} is not a valid Durable Object binding.`)
   }
@@ -41,15 +41,6 @@ const proxyDurable = (durable, middlewareOptions = {}) => {
         })
 
         const stubFetch = (obj, type, prop, content) => {
-          // return json({
-          //   middlewareOptions,
-          //   stub, mock,
-          //   options,
-          //   class: typeof options.Class,
-          //   parse: options.parse,
-          //   obj, type, prop, content,
-          // })
-
           const theFetch = obj.fetch(buildRequest(type, prop, content))
 
           return options.parse
@@ -69,5 +60,3 @@ const proxyDurable = (durable, middlewareOptions = {}) => {
     }
   }
 }
-
-module.exports = { proxyDurable }

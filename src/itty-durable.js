@@ -1,18 +1,18 @@
-const { Router } = require('itty-router')
-const {
+import { Router } from 'itty-router'
+import {
   error,
   json,
-  withParams,
-  withContent,
   StatusError,
-} = require('itty-router-extras')
+  withContent,
+  withParams
+} from 'itty-router-extras'
+import { proxyDurable } from './proxy-durable'
 
-const { proxyDurable } = require('./proxy-durable')
-
-const createIttyDurable = (options = {}) => {
+// factory function for IttyDurable with custom options
+export const createIttyDurable = (options = {}) => {
   const {
     autoPersist = false,
-    autoReturnThis = false,
+    autoReturn = false,
     onError = err => error(err.status || 500, err.message),
   } = options
 
@@ -77,27 +77,18 @@ const createIttyDurable = (options = {}) => {
       return proxied
     }
 
-    // gets persistable state (defaults to all but itty data)
-    getPersistable() {
-      const { state, router, ...persistable } = this
+    // purge storage, and optionally reset internal memory state
+    async destroy(options = {}) {
+      const { reset = false } = options
 
-      return persistable
-    }
+      await this.state.storage.deleteAll()
 
-    // persists to storage, override to control
-    async persist() {
-      await this.state.storage.put('data', this.getPersistable())
-    }
-
-    async loadFromStorage() {
-      if (!this.state.initialized) {
-        const stored = await this.state.storage.get('data') || {}
-
-        Object.assign(this, stored)
-        this.state.initialized = true
+      if (reset) {
+        this.reset()
       }
     }
 
+    // fetch method is the expected interface method of Durable Objects per Cloudflare spec
     async fetch(...args) {
       // save default state for reset
       this.saveDefaultState()
@@ -118,6 +109,36 @@ const createIttyDurable = (options = {}) => {
       return response || error(400, 'Bad request to durable object')
     }
 
+    // gets persistable state (defaults to all but itty data)
+    getPersistable() {
+      const { state, router, ...persistable } = this
+
+      return persistable
+    }
+
+    async loadFromStorage() {
+      if (!this.state.initialized) {
+        const stored = await this.state.storage.get('data') || {}
+
+        Object.assign(this, stored)
+        this.state.initialized = true
+      }
+    }
+
+    // returns self from methods that fail to return if autoReturn flag is enabled
+    optionallyReturnThis() {
+      if (autoReturn) {
+        return json(this.toJSON
+                    ? this.toJSON()
+                    : this)
+      }
+    }
+
+    // persists to storage, override to control
+    async persist() {
+      await this.state.storage.put('data', this.getPersistable())
+    }
+
     reset() {
       for (const key in this.getPersistable()) {
         Reflect.deleteProperty(this, key)
@@ -125,25 +146,6 @@ const createIttyDurable = (options = {}) => {
 
       // reset to defaults from constructor
       Object.assign(this, JSON.parse(this.state.defaultState))
-    }
-
-    // purge storage, and optionally reset internal memory state
-    async destroy(options = {}) {
-      const { reset = false } = options
-
-      await this.state.storage.deleteAll()
-
-      if (reset) {
-        this.reset()
-      }
-    }
-
-    optionallyReturnThis() {
-      if (alwaysReturnThis) {
-        return json(this.toJSON
-                    ? this.toJSON()
-                    : this)
-      }
     }
 
     saveDefaultState() {
@@ -156,17 +158,4 @@ const createIttyDurable = (options = {}) => {
       return this.getPersistable()
     }
   }
-}
-
-export const SimpleDurable = createIttyDurable()
-
-// export
-export const AutoDurable = createIttyDurable({
-  autoPersist: true,
-  autoReturnThis: true,
-})
-
-module.exports = {
-  createIttyDurable,
-  IttyDurable,
 }
