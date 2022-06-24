@@ -2540,16 +2540,6 @@ istanbul-reports@^3.0.2:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
 
-itty-router-extras@^0.4.1:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/itty-router-extras/-/itty-router-extras-0.4.1.tgz#60fd84d04401bbadf5479229a0ff0bb7c707e8c8"
-  integrity sha512-x7b0ryH4sG/jv3i/lxv+tCwaAakapIftzZeTFVuTcQtP8WeyxIxVtYgy7oj+OZLnpX4G0GFjt4I2xcmV2FfzIQ==
-
-itty-router@^2.3.6:
-  version "2.3.6"
-  resolved "https://registry.yarnpkg.com/itty-router/-/itty-router-2.3.6.tgz#f800bffe3d7da64a2d112c353d208f57c9c2f696"
-  integrity sha512-rBCVdpNa7NFFskwWzXAT846bCMIIrUq9Nhntr6w6qhX7MuGWFWElQYQ6DQ4XCOGsNQzEpfTXHSWQBpIDjVbIiw==
-
 jest-changed-files@^26.6.2:
   version "26.6.2"
   resolved "https://registry.yarnpkg.com/jest-changed-files/-/jest-changed-files-26.6.2.tgz#f6198479e1cc66f22f9ae1e22acaa0b429c042d0"
@@ -4498,6 +4488,11 @@ typedarray-to-buffer@^3.1.5:
   integrity sha512-zdu8XMNEDepKKR+XYOXAVPtWui0ly0NtohUscw+UmaHiAWT8hrV1rr//H6V+0DvJ3OQ19S979M0laLfX8rm82Q==
   dependencies:
     is-typedarray "^1.0.0"
+
+typescript@^4.7.4:
+  version "4.7.4"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.7.4.tgz#1a88596d1cf47d59507a1bcdfb5b9dfe4d488235"
+  integrity sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ==
 
 union-value@^1.0.0:
   version "1.0.1"

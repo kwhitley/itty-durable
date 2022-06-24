@@ -11,8 +11,8 @@ const { proxyDurable } = require('./proxy-durable')
 
 const createIttyDurable = (options = {}) => {
   const {
-    persistOnChange = true,
-    alwaysReturnThis = true,
+    autoPersist = false,
+    autoReturnThis = false,
     onError = err => error(err.status || 500, err.message),
   } = options
 
@@ -20,11 +20,10 @@ const createIttyDurable = (options = {}) => {
     constructor(state = {}, env = {}) {
       this.state = {
         defaultState: undefined,
+        initialized: false,
         ...env,
         ...state,
       }
-
-      this.storage = state.storage
 
       // embed bindings into this.env
       for (const [key, binding] of Object.entries(env)) {
@@ -41,11 +40,7 @@ const createIttyDurable = (options = {}) => {
                             ? obj[prop].bind(receiver)
                             : obj[prop],
 
-        // track isDirty
         set: (obj, prop, value) => {
-          if (obj[prop] !== value) {
-            this.state.isDirty = true
-          }
           obj[prop] = value
 
           return true
@@ -76,7 +71,6 @@ const createIttyDurable = (options = {}) => {
               return json(await proxied[target])
             }
           },
-          proxied.optionallyPersist,
           proxied.optionallyReturnThis,
         )
 
@@ -85,63 +79,43 @@ const createIttyDurable = (options = {}) => {
 
     // gets persistable state (defaults to all but itty data)
     getPersistable() {
-      const { state, storage, router, ...persistable } = this
+      const { state, router, ...persistable } = this
 
       return persistable
     }
 
     // persists to storage, override to control
     async persist() {
-      if (this.state.isDirty) {
-        await this.storage.put('data', this.getPersistable())
-      }
+      await this.state.storage.put('data', this.getPersistable())
     }
 
     async loadFromStorage() {
-      const stored = await this.storage.get('data') || {}
+      if (!this.state.initialized) {
+        const stored = await this.state.storage.get('data') || {}
 
-      Object.assign(this, stored)
-
-      this.state.isDirty = false
-    }
-
-    // initializes from storage, override to control
-    async initialize() {
-      // INITIALIZATION
-      if (!this.state.initializePromise) {
-        // save default state before loading from storage
-        this.state.defaultState = JSON.stringify(this.getPersistable())
-
-        this.state.initializePromise = this.loadFromStorage().catch(err => {
-          this.state.initializePromise = undefined
-          throw err
-        })
+        Object.assign(this, stored)
+        this.state.initialized = true
       }
-      await this.state.initializePromise
     }
 
     async fetch(...args) {
-      // INITIALIZATION
-      await this.initialize()
-      this.state.isDirty = false
+      // save default state for reset
+      this.saveDefaultState()
+
+      await this.loadFromStorage()
 
       // we pass off the request to the internal router
       const response = await this.router
                                     .handle(...args)
                                     .catch(onError)
 
+      // if persistOnChange is true, we persist on every response
+      if (persistOnChange) {
+        this.persist()
+      }
+
       // then return the response
       return response || error(400, 'Bad request to durable object')
-    }
-
-    async optionallyPersist(request, env = {}, ctx = {}) {
-      if (persistOnChange) {
-        if (ctx.waitUntil) {
-          ctx.waitUntil(this.persist())
-        } else {
-          await this.persist()
-        }
-      }
     }
 
     reset() {
@@ -157,7 +131,7 @@ const createIttyDurable = (options = {}) => {
     async destroy(options = {}) {
       const { reset = false } = options
 
-      await this.storage.deleteAll()
+      await this.state.storage.deleteAll()
 
       if (reset) {
         this.reset()
@@ -172,13 +146,25 @@ const createIttyDurable = (options = {}) => {
       }
     }
 
+    saveDefaultState() {
+      if (!this.state.initialized) {
+        this.state.defaultState = JSON.stringify(this.getPersistable())
+      }
+    }
+
     toJSON() {
       return this.getPersistable()
     }
   }
 }
 
-const IttyDurable = createIttyDurable() // we accept sane defaults
+export const SimpleDurable = createIttyDurable()
+
+// export
+export const AutoDurable = createIttyDurable({
+  autoPersist: true,
+  autoReturnThis: true,
+})
 
 module.exports = {
   createIttyDurable,

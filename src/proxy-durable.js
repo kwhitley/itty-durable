@@ -60,8 +60,7 @@ const proxyDurable = (durable, middlewareOptions = {}) => {
         return new Proxy(stub, {
           get: (obj, prop) => isValidMethod(prop)
                               ? (...args) => stubFetch(obj, 'call', prop, args)
-                              : stubFetch(obj, 'get-prop', prop)
-          ,
+                              : stubFetch(obj, 'get-prop', prop),
           set: (obj, prop, value) => stubFetch(obj, 'set', prop, value),
         })
       } catch (err) {
