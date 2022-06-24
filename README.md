@@ -13,24 +13,18 @@
 Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing **lightweight object definitions** and **direct access** to object methods from within Workers (no need for request building/handling).
 
 ## Features
-- Removes nearly all boilerplate from using Durable Objects, by automatically handling request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router).
+- Removes nearly all boilerplate from writing **and** using Durable Objects.
 - Optional automatic non-blocking persistance layer
 - Optionally return contents from methods without explicit return (convenience feature)
 - Control how contents of object looks to outside requests
 - Control exactly what, if anything, is persisted
 
-## Installation
-
-```
-npm install itty-durable
-```
-
 ## Example
 ##### Counter.js (your Durable Object class)
 ```js
-import { createIttyDurable } from 'itty-durable'
+import { createDurable } from 'itty-durable'
 
-export class Counter extends createIttyDurable({ autoReturn: true }) {
+export class Counter extends createDurable({ autoReturn: true }) {
   constructor(state, env) {
     super(state, env)
 
@@ -104,10 +98,10 @@ router
 export default {
   fetch: router.handle
 }
-```
 
-### Interacting with it!
-```
+/*
+Example Interactions:
+
 GET /counter/increment-a-few-times          => { counter: 3 }
 GET /counter/increment-a-few-times          => { counter: 6 }
 GET /counter/reset                          => { counter: 0 }
@@ -115,8 +109,21 @@ GET /counter/increment                      => { counter: 1 }
 GET /counter/increment                      => { counter: 2 }
 GET /counter/add/20/3                       => 23
 GET /counter                                => { counter: 2 }
+*/
 ```
-(more examples to come shortly, hang tight!)
+
+## How it Works
+This library works via a two part process:
+
+1. First of all, we create a base class for your Durable Objects to extend (through `createDurable()`).  This embeds the persistance layer, a few convenience functions, and most importantly, a tiny internal [itty-router](https://www.npmjs.com/package/itty-router) to handle fetch requests.  Using this removes the boilerplate from your objects themselves, allowing them to be **only** business logic.
+
+2. Next, we expose the `withDurables()` middleware for use within your Workers (it is designed for drop-in use with [itty-router](https://www.npmjs.com/package/itty-router), but should work with virtually any typical Worker router).  This embeds proxied stubs (translation: "magic stubs") into the Request.  Using these stubs, you can call methods on the Durable Object directly, rather than manually creating fetch requests to do so (that's all handled internally, communicating with the embedded router within the Durable Objects themselves).
+
+## Installation
+
+```
+npm install itty-durable
+```
 
 ## Exports
 
