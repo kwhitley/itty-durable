@@ -10,12 +10,10 @@
   <img alt="" src="https://img.shields.io/twitter/follow/kevinrwhitley.svg?style=social&label=Follow" />
 </a>
 
-Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing lightweight object definitions and **direct access** to object methods from within Workers (no need for request building/handling).
+Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/introducing-workers-durable-objects/), allowing **lightweight object definitions** and **direct access** to object methods from within Workers (no need for request building/handling).
 
 ## Features
-- Removes nearly all boilerplate from writing Durable Objects and using them within Workers
-- Automatically handles request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router)
-- Universal middleware to add object proxies to Request (built for use with [itty-router](https://www.npmjs.com/package/itty-router), but should work with other Worker routers).
+- Removes nearly all boilerplate from using Durable Objects, by automatically handling request building/handling internally via [itty-router](https://www.npmjs.com/package/itty-router)
 - Optional, automatic non-blocking persistance (persists after object response, and loads from storage automatically)
 - Optionally return Durable contents from methods without explicit return (convenience feature)
 - Control how contents of Durable look to outside requests
@@ -28,7 +26,7 @@ npm install itty-durable
 ```
 
 ## Example
-##### Counter.js (your durable object class)
+##### Counter.js (your Durable Object class)
 ```js
 import { createIttyDurable } from 'itty-durable'
 
@@ -40,21 +38,21 @@ export class Counter extends createIttyDurable({ autoReturn: true }) {
     this.counter = 0
   }
 
+  // Because this function does not return anything, it will return the entire contents
+  // Example: { counter: 1 }
   increment() {
     this.counter++
-
-    // because this function does not return anything, it will return the entire contents
-    // Example: { counter: 1 }
   }
 
+  // Any explicit return will honored, despite the autoReturn flag.
+  // Note that any serializable params can passed through from the Worker without issue.
   add(a, b) {
-    // a function can explicitly return something insead
     return a + b
   }
 }
 ```
 
-##### Worker.js (your standard CF worker)
+##### Worker.js (your CF Worker function)
 ```js
 import { ThrowableRouter, missing, withParams } from 'itty-router-extras'
 import { withDurables } from 'itty-durable'
@@ -68,7 +66,7 @@ router
   // add upstream middleware, allowing Durable access off the request
   .all('*', withDurables())
 
-  // get get the durable itself... returns json response, so no need to wrap
+  // get the durable itself... returns json response, so no need to wrap
   .get('/', ({ Counter }) => Counter.get('test').toJSON())
 
   // example route with multiple calls to DO
