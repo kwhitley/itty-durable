@@ -1,13 +1,13 @@
 import { json, StatusError } from 'itty-router-extras'
 
 // helper function to parse response
-const transformResponse = response => {
+const transformResponse = async response => {
   try {
-    return response.json()
+    return await response.json()
   } catch (err) {}
 
   try {
-    return response.text()
+    return await response.text()
   } catch (err) {}
 
   return response
