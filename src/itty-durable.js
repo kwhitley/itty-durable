@@ -22,6 +22,7 @@ export const createDurable = (options = {}) => {
         defaultState: undefined,
         initialized: false,
         router: Router(),
+        env,
         ...env,
         ...state,
       }
