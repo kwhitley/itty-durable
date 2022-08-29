@@ -28,7 +28,6 @@ module.exports = {
       'block-spacing': 'error',
       'callback-return': 'error',
       'camelcase': 'error',
-      'class-methods-use-this': 'error',
       'comma-spacing': [
           'error',
           {

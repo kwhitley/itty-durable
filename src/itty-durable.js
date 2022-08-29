@@ -86,20 +86,23 @@ export const createDurable = (options = {}) => {
       if (reset) {
         this.reset()
       }
+
+      await this.onDestroy()
     }
 
     // fetch method is the expected interface method of Durable Objects per Cloudflare spec
-    async fetch(...args) {
+    async fetch(request, ...args) {
       // save default state for reset
       if (!this.state.initialized) {
         this.state.defaultState = JSON.stringify(this.getPersistable())
       }
 
+      // load initial state from storage (if found)
       await this.loadFromStorage()
 
       // we pass off the request to the internal router
       const response = await this.state.router
-                                      .handle(...args)
+                                      .handle(request, ...args)
                                       .catch(onError)
 
       // if persistOnChange is true, we persist on every response
@@ -123,8 +126,20 @@ export const createDurable = (options = {}) => {
         const stored = await this.state.storage.get('data') || {}
 
         Object.assign(this, stored)
+
+        // then run afterInitialization lifecycle function
+        await this.onLoad()
+
         this.state.initialized = true
       }
+    }
+
+    async onDestroy() {
+      // fires after this.destroy() is called
+    }
+
+    async onLoad() {
+      // fires after object is loaded from storage
     }
 
     // returns self from methods that fail to return if autoReturn flag is enabled

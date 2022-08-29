@@ -23,9 +23,13 @@ export const proxyDurable = (durable, middlewareOptions = {}) => {
     get: (id, options = {}) => {
       options = { ...middlewareOptions, ...options }
 
+      const otherHeaders = {}
+
       try {
-        if (typeof id === 'string') {
+        if (typeof id === 'string') { // should add check for hex id string and handle appropriately
           id = durable.idFromName(id)
+
+          otherHeaders['itty-durable:idFromName'] = id
         }
 
         const stub = durable.get(id)
@@ -36,6 +40,7 @@ export const proxyDurable = (durable, middlewareOptions = {}) => {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...otherHeaders,
           },
           body: JSON.stringify(content)
         })

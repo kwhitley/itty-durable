@@ -3,16 +3,15 @@
   "name": "itty-durable-example",
   "version": "0.1.0",
   "description": "Example repo for itty-durable",
-  "module": "./dist/index.mjs",
   "scripts": {},
   "author": "Kevin Whitley <krwhitley@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "esbuild": "^0.14.47",
-    "prettier": "^2.7.1"
+    "esbuild": "^0.11.11",
+    "prettier": "^2.2.1"
   },
   "dependencies": {
-    "itty-router": "^2.6.1",
+    "itty-router": "^2.5.0",
     "itty-router-extras": "^0.4.2"
   }
 }
