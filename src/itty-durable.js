@@ -92,6 +92,12 @@ export const createDurable = (options = {}) => {
 
     // fetch method is the expected interface method of Durable Objects per Cloudflare spec
     async fetch(request, ...args) {
+      const idFromName = request.headers.get('itty-durable:idFromName')
+
+      if (idFromName) {
+        this.state.idFromName = idFromName
+      }
+
       // save default state for reset
       if (!this.state.initialized) {
         this.state.defaultState = JSON.stringify(this.getPersistable())
