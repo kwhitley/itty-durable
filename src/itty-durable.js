@@ -87,7 +87,12 @@ export const createDurable = (options = {}) => {
         this.reset()
       }
 
-      await this.onDestroy()
+      const destructionResponse = await this.onDestroy()
+
+      // optionally return if onDestroy returns something
+      if (destructionResponse) {
+        return destructionResponse
+      }
     }
 
     // fetch method is the expected interface method of Durable Objects per Cloudflare spec
