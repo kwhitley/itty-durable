@@ -27,9 +27,8 @@ export const proxyDurable = (durable, middlewareOptions = {}) => {
 
       try {
         if (typeof id === 'string') { // should add check for hex id string and handle appropriately
+          otherHeaders['itty-durable-idFromName'] = id
           id = durable.idFromName(id)
-
-          otherHeaders['itty-durable:idFromName'] = id
         }
 
         const stub = durable.get(id)

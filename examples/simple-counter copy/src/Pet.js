@@ -3,11 +3,8 @@ import { createDurable } from '../../../src' // from 'itty-durable'
 export class Pet extends createDurable({ autoReturn: true, autoPersist: true }) {
   constructor(state, env) {
     super(state, env)
-    this.humans = []
-  }
 
-  setName(name) {
-    this.name = name
+    this.humans = []
   }
 
   add(human) {
@@ -20,9 +17,11 @@ export class Pet extends createDurable({ autoReturn: true, autoPersist: true }) 
   }
 
   toJSON() {
+    const { state, ...other } = this
+
     return {
-      name: this.name,
-      humans: this.humans,
+      name: this.state.idFromName,
+      ...other
     }
   }
 }

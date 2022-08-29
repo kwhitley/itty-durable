@@ -1,3 +1,4 @@
+import { Router } from 'itty-router'
 import {
   error,
   json,
@@ -14,17 +15,17 @@ export { Human } from './Human'
 export { Pet } from './Pet'
 
 // create a basic router
-const router = ThrowableRouter({ base: '/advanced', stack: true })
+const router = Router({ base: '/advanced' })
 
 router
   // add upstream middleware
   .get('*', withDurables())
 
   // get get the durable itself... returns JSON Response, so no need to wrap
-  .get('/human/:name', withParams, ({ name, Human }) => Human.get(name).setName(name))
+  .get('/human/:name', withParams, ({ name, Human }) => Human.get(name).toJSON())
 
   // same for pets
-  .get('/pet/:name', withParams, ({ name, Pet }) => Pet.get(name).setName(name))
+  .get('/pet/:name', withParams, ({ name, Pet }) => Pet.get(name).toJSON())
 
   .get('/pet/:petName/addHuman/:humanName', withParams,
     ({ petName, humanName, Pet }) => Pet.get(petName).add(humanName)
@@ -39,7 +40,9 @@ router
 
 // CF ES6 module syntax
 export default {
-  fetch: router.handle
+  fetch: (...args) => router
+                        .handle(...args)
+                        .catch(err => error(500, err.message))
 }
 
 /*

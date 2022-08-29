@@ -6,10 +6,6 @@ export class Human extends createDurable({ autoReturn: true, autoPersist: true }
     this.pets = []
   }
 
-  setName(name) {
-    this.name = name
-  }
-
   add(pet) {
     if (!this.pets.includes(pet)) {
       this.pets.push(pet)
@@ -20,9 +16,11 @@ export class Human extends createDurable({ autoReturn: true, autoPersist: true }
   }
 
   toJSON() {
+    const { state, ...other } = this
+
     return {
-      name: this.name,
-      pets: this.pets,
+      name: this.state.name,
+      ...other
     }
   }
 }
