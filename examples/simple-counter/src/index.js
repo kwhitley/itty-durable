@@ -13,7 +13,7 @@ import { withDurables } from '../../../src' // from 'itty-durable'
 export { Counter } from './Counter'
 
 // create a basic router
-const router = ThrowableRouter({ base: '/simple-counter', stack: true })
+const router = ThrowableRouter({ base: '/' })
 
 router
   // add upstream middleware
@@ -44,6 +44,8 @@ router
   .get('/:action/:a?/:b?', withParams,
     ({ Counter, action, a, b }) => Counter.get('test')[action](a, b)
   )
+
+  .get('*', request => text(request.url))
 
   // all else gets a 404
   .all('*', () => missing('Are you sure about that?'))

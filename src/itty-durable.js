@@ -121,6 +121,11 @@ export const createDurable = (options = {}) => {
         this.persist()
       }
 
+      // provide an escape hatch for things like Alarms
+      if (this.fetchFallback) {
+        return this.fetchFallback()
+      }
+
       // then return the response
       return response || error(400, 'Bad request to durable object')
     }
