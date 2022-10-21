@@ -95,6 +95,14 @@ export const createDurable = (options = {}) => {
       }
     }
 
+    getAlarm() {
+      return this.state.storage.getAlarm()
+    }
+
+    setAlarm(expiration) {
+      return this.state.storage.setAlarm(expiration)
+    }
+
     // fetch method is the expected interface method of Durable Objects per Cloudflare spec
     async fetch(request, ...args) {
       const idFromName = request.headers.get('itty-durable-idFromName')
