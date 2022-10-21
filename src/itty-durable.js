@@ -122,7 +122,7 @@ export const createDurable = (options = {}) => {
       }
 
       // provide an escape hatch for things like Alarms
-      if (this.fetchFallback) {
+      if (!response && this.fetchFallback) {
         return this.fetchFallback()
       }
 
