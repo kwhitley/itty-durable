@@ -25,6 +25,7 @@ export const createDurable = (options = {}) => {
         env,
         ...env,
         ...state,
+        state,
       }
 
       // embed bindings into this.env
