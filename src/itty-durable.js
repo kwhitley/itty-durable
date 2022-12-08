@@ -107,6 +107,7 @@ export const createDurable = (options = {}) => {
     async fetch(request, ...args) {
       const idFromName = request.headers.get('itty-durable-idFromName')
       this.state.websocketRequest = request.headers.get('upgrade')?.toLowerCase() === 'websocket'
+      this.state.request = request
 
       if (idFromName) {
         this.state.idFromName = idFromName
