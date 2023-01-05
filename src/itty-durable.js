@@ -18,14 +18,14 @@ export const createDurable = (options = {}) => {
 
   return class IttyDurable {
     constructor(state = {}, env = {}) {
-      this.state = {
+      this.state = state
+      
+      Object.assign(this.state, {
         defaultState: undefined,
         initialized: false,
         router: Router(),
         env,
         ...env,
-        ...state,
-        state,
       }
 
       // embed bindings into this.env
