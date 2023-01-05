@@ -145,6 +145,10 @@ export const createDurable = (options = {}) => {
 
       return persistable
     }
+    
+    async block(callback) {  
+      return  await this.state.blockConcurrencyWhile(callback)
+    }
 
     async loadFromStorage() {
       if (!this.state.initialized) {
