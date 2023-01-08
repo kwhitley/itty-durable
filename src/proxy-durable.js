@@ -1,4 +1,4 @@
-import { json, error, StatusError } from 'itty-router-extras'
+import { StatusError } from 'itty-router-extras'
 
 const catchErrors = async response => {
   if (response.ok || response.status === 101) return response
@@ -11,17 +11,20 @@ const catchErrors = async response => {
     body = await response.text()
   }
 
-  throw new StatusError(response.status, body?.error || body)
+  throw new StatusError(response.status, body?.error || body || response.statusText)
 }
 
 // helper function to parse response
-const transformResponse = async response => {
+const transformResponse = response => {
+  const contentType = response.headers.get('content-type')
   try {
-    return response.json()
+    if (contentType.includes('json'))
+      return response.json()
   } catch (err) {}
 
   try {
-    return response.text()
+    if (contentType.includes('text'))
+      return response.text()
   } catch (err) {}
 
   return response
@@ -52,7 +55,6 @@ export const proxyDurable = (durable, middlewareOptions = {}) => {
 
         const buildRequest = (type, prop, content) => {
           return new Request(`https://itty-durable/do/${type}/${prop}`, {
-            method: 'GET',
             headers: {
               ...headers,
               'do-content': JSON.stringify(content),
