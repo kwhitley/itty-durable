@@ -2,6 +2,7 @@ import { Router } from 'itty-router'
 import {
   error,
   json,
+  status,
   StatusError,
   withContent,
   withParams
@@ -49,9 +50,10 @@ export const createDurable = (options = {}) => {
 
       // one router to rule them all
       this.state.router
-        .post('/:action/:target', withParams, withContent,
+        .get('/do/:action/:target', withParams,
           async (request, env) => {
-            const { action, target, content = [] } = request
+            const { action, headers, target } = request
+            const content = JSON.parse(headers.get('do-content') || '[]')
 
             if (action === 'call') {
               if (typeof this[target] !== 'function') {
@@ -72,6 +74,7 @@ export const createDurable = (options = {}) => {
             }
           },
           proxied.optionallyReturnThis,
+          () => status(204)
         )
 
       return proxied
@@ -105,7 +108,8 @@ export const createDurable = (options = {}) => {
 
     // fetch method is the expected interface method of Durable Objects per Cloudflare spec
     async fetch(request, ...args) {
-      const idFromName = request.headers.get('itty-durable-idFromName')
+      const { method, url, headers } = request
+      const idFromName = request.headers.get('do-name')
       this.state.websocketRequest = request.headers.get('upgrade')?.toLowerCase() === 'websocket'
       this.state.request = request
 

@@ -15,7 +15,9 @@ export const withDurables = (options = {}) => (request, env) => {
     if (isDurable(binding)) {
       const proxied = proxyDurable(binding, {
         name: key,
-        class: classes[key], // pass in class key by default
+        class: classes[key], // pass in class key by default,
+        headers: Object.fromEntries(request.headers),
+        env,
         parse,
       })
 
