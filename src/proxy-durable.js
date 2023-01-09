@@ -55,15 +55,13 @@ export const proxyDurable = (durable, middlewareOptions = {}) => {
         const mock = typeof options.class === 'function' && new options.class()
         const isValidMethod = prop => prop !== 'fetch' && (!mock || typeof mock[prop] === 'function')
 
-        const buildRequest = (type, prop, content) => {
-          return new Request(`https://itty-durable/do/${type}/${prop}`, {
+        const buildRequest = (type, prop, content) =>
+          new Request(`https://itty-durable/do/${type}/${prop}`, {
             headers: {
               ...headers,
               'do-content': JSON.stringify(content),
             },
           })
-        }
-
 
         const stubFetch = (obj, type, prop, content) => {
           const theFetch = obj
