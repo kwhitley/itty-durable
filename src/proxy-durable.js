@@ -15,16 +15,18 @@ const catchErrors = async response => {
 }
 
 // helper function to parse response
-const transformResponse = response => {
+const transformResponse = async response => {
   const contentType = response.headers.get('content-type')
-  try {
-    if (contentType.includes('json'))
-      return response.json()
-  } catch (err) {}
+  let body
 
   try {
-    if (contentType.includes('text'))
-      return response.text()
+    if (contentType.includes('json')) {
+      body = await response.json()
+    } else if (contentType.includes('text')) {
+      body = await response.text()
+    }
+
+    return body
   } catch (err) {}
 
   return response
