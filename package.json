@@ -19,7 +19,9 @@
     "prebuild": "rimraf dist",
     "build-old": "terser-folder src -eo dist --pattern '**/*.js,!**/*spec.js' -x .js",
     "build": "rm -fr dist/* && tsc -p tsconfig.json",
-    "release": "release --tag --push --src=dist"
+    "release": "release --tag --push --src=dist",
+    "prerelease:next": "yarn verify",
+    "release:next": "release --push --type=next --src=dist"
   },
   "repository": {
     "type": "git",
