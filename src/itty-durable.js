@@ -56,7 +56,7 @@ export const createDurable = (options = {}) => {
 
             if (action === 'call') {
               if (typeof this[target] !== 'function') {
-                throw new StatusError(500, `Durable Object state{this.constructor.name} does not contain method state{target}()`)
+                throw new StatusError(500, `Durable Object does not contain method ${target}()`)
               }
               const response = await proxied[target](...content)
 
