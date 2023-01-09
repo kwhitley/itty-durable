@@ -4,8 +4,7 @@ import {
   json,
   status,
   StatusError,
-  withContent,
-  withParams
+  withParams,
 } from 'itty-router-extras'
 import { proxyDurable } from './proxy-durable'
 
