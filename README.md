@@ -20,6 +20,11 @@ Simplifies usage of [Cloudflare Durable Objects](https://blog.cloudflare.com/int
 - Control exactly what, if anything, is persisted
 - Already being used in production on high-availability/throughput apps like the [Retheme](http://retheme.org/) browser extension!
 
+## Installation
+```
+npm install itty-router itty-durable
+```
+
 ## Example
 ##### Counter.js (your Durable Object class)
 ```js
