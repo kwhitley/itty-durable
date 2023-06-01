@@ -10,8 +10,7 @@
   ],
   "scripts": {
     "lint": "npx eslint src",
-    "test:dist": "vitest --coverage dist",
-    "test": "yarn lint && vitest --coverage src",
+    "test": "vitest --coverage --reporter verbose",
     "verify": "echo 'verifying module...' && yarn build && yarn test",
     "dev": "yarn lint && vitest --watch src",
     "coveralls": "cat ./coverage/lcov.info | node node_modules/.bin/coveralls",
@@ -19,9 +18,7 @@
     "prebuild": "rimraf dist && yarn test",
     "build-old": "terser-folder src -eo dist --pattern '**/*.js,!**/*spec.js' -x .js",
     "build": "rm -fr dist/* && tsc -p tsconfig.json",
-    "release": "release --tag --push --src=dist",
-    "prerelease:next": "yarn verify",
-    "release:next": "release --push --type=next --src=dist"
+    "release": "release --tag --patch --push --src=dist"
   },
   "repository": {
     "type": "git",
@@ -41,6 +38,7 @@
     "eslint-plugin-jest": "^26.5.3",
     "isomorphic-fetch": "^3.0.0",
     "itty-router": "^4.0.9",
+    "jsdom": "^22.1.0",
     "rimraf": "^3.0.2",
     "typescript": "^4.7.4",
     "vitest": "^0.31.4",
