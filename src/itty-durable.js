@@ -1,11 +1,11 @@
-import { Router } from 'itty-router'
 import {
   error,
   json,
   status,
   StatusError,
+  Router,
   withParams,
-} from 'itty-router-extras'
+} from 'itty-router'
 import { proxyDurable } from './proxy-durable'
 
 // factory function for IttyDurable with custom options

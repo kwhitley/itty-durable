@@ -1,5 +1,5 @@
 require('isomorphic-fetch')
-
+import { describe, it, expect } from 'vitest'
 import { proxyDurable } from './proxy-durable'
 
 describe('proxyDurable(durable:object, options?:object)', () => {

@@ -1,4 +1,4 @@
-import { StatusError } from 'itty-router-extras'
+import { StatusError } from 'itty-router'
 
 const catchErrors = async response => {
   if (response.ok || response.status === 101) return response

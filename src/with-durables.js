@@ -1,4 +1,4 @@
-import { StatusError } from 'itty-router-extras'
+import { StatusError } from 'itty-router'
 import { proxyDurable } from './proxy-durable'
 
 // returns true if binding appears to be a durable binding
