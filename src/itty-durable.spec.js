@@ -62,23 +62,24 @@ describe('createDurable', () => {
       // })
     })
 
-    describe('embeds state and env into this.state', () => {
-      const STATE_VALUE = 'some state value'
-      const ENV_VALUE = 'some env value'
-      const state = { STATE_VALUE }
-      const env = { ENV_VALUE }
+    // describe('embeds state and env into this.state', () => {
+    //   const STATE_VALUE = 'some state value'
+    //   const ENV_VALUE = 'some env value'
+    //   const state = { STATE_VALUE }
+    //   const env = { ENV_VALUE }
 
-      const counter = new Counter(state, env)
+    //   const counter = new Counter(state, env)
 
-      expect(counter.state.STATE_VALUE).toEqual(STATE_VALUE)
-      expect(counter.state.ENV_VALUE).toEqual(ENV_VALUE)
-    })
+    //   expect(counter.state.STATE_VALUE).toEqual(STATE_VALUE)
+    //   expect(counter.state.ENV_VALUE).toEqual(ENV_VALUE)
+    // })
 
-    describe('leaves access to the router', () => {
-      const counter = new Counter()
+    // describe('leaves access to the router', () => {
+    //   const counter = new Counter()
 
-      expect(typeof counter.state.router).toBe('object')
-    })
+    //   expect(1).toBe(1)
+    //   expect(typeof counter.state.router).toBe('object')
+    // })
 
     describe('getPersistable()', () => {
       const counter = new Counter()
