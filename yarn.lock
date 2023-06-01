@@ -36,6 +36,11 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
+"@cloudflare/workers-types@^4.20230518.0":
+  version "4.20230518.0"
+  resolved "https://registry.yarnpkg.com/@cloudflare/workers-types/-/workers-types-4.20230518.0.tgz#de1b0f71d68e2eac1b546542968ea2b837cb967e"
+  integrity sha512-A0w1V+5SUawGaaPRlhFhSC/SCDT9oQG8TMoWOKFLA4qbqagELqEAFD4KySBIkeVOvCBLT1DZSYBMCxbXddl0kw==
+
 "@esbuild/android-arm64@0.17.19":
   version "0.17.19"
   resolved "https://registry.yarnpkg.com/@esbuild/android-arm64/-/android-arm64-0.17.19.tgz#bafb75234a5d3d1b690e7c2956a599345e84a2fd"

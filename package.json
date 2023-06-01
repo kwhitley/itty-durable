@@ -10,9 +10,9 @@
   ],
   "scripts": {
     "lint": "npx eslint src",
-    "test": "vitest --coverage --reporter verbose",
-    "verify": "echo 'verifying module...' && yarn build && yarn test",
-    "dev": "yarn lint && vitest --watch src",
+    "test": "vitest run --coverage --reporter verbose",
+    "verify": "echo 'verifying module...' && yarn build",
+    "dev": "yarn lint && vitest src",
     "coverage": "vitest run --coverage",
     "prerelease": "yarn verify",
     "prebuild": "rimraf dist && yarn test",
@@ -30,6 +30,7 @@
     "email": "krwhitley@gmail.com"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20230518.0",
     "@types/jest": "^29.5.2",
     "@vitest/coverage-c8": "^0.31.4",
     "coveralls": "^3.1.1",
