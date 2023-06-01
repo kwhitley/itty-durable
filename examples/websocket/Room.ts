@@ -27,12 +27,12 @@ export class Room extends createDurable({ autoPersist: true }) {
     sockets.push({ id, server })
 
     // send a message to all connected sockets
-    this.sendMessage('A new connection has been established!')
+    this.broadcast('A new connection has been established!')
 
     return new Response(null, { status: 101, webSocket: client })
   }
 
-  sendMessage(message: string) {
+  broadcast(message: string) {
     // send a message to all open sockets
     for (const socket of this.sockets) {
       socket.send(message)
