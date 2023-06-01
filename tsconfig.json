@@ -18,7 +18,7 @@
     "skipLibCheck": true,
     "strict": false,
     "traceResolution": false,
-    "outDir": "",
+    "outDir": "dist",
     "target": "esnext",
     "module": "esnext",
     "types": ["@cloudflare/workers-types", "@types/node"]
