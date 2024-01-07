@@ -18,13 +18,14 @@ export const createDurable = (options = {}) => {
 
   return class IttyDurable {
     constructor(state = {}, env = {}) {
-      this.state = {
+      this.state = state
+      
+      Object.assign(this.state, {
         defaultState: undefined,
         initialized: false,
         router: Router(),
         env,
         ...env,
-        ...state,
       }
 
       // embed bindings into this.env
@@ -145,6 +146,10 @@ export const createDurable = (options = {}) => {
       const { state, ...persistable } = this
 
       return persistable
+    }
+    
+    async block(callback) {  
+      return  await this.state.blockConcurrencyWhile(callback)
     }
 
     async loadFromStorage() {
