@@ -98,10 +98,13 @@ export const createDurable = (options = {}) => {
       }
     }
 
+    // ALARMS
+    deleteAlarm() {
+      return this.state.storage.deleteAlarm()
+    }
     getAlarm() {
       return this.state.storage.getAlarm()
     }
-
     setAlarm(expiration) {
       return this.state.storage.setAlarm(expiration)
     }
