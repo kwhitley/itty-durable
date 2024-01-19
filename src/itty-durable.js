@@ -80,6 +80,11 @@ export const createDurable = (options = {}) => {
       return proxied
     }
 
+    // HELPER to allow DO to see it's own id, as called by the Worker
+    get id() {
+      return this.state.idFromName || this.state.id
+    }
+
     // purge storage, and optionally reset internal memory state
     async destroy(options = {}) {
       const { reset = false } = options
